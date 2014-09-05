@@ -3,13 +3,6 @@ from decorator import decorator
 import numpy as np
 import cairo
 
-try:
-    from scipy.misc import imsave
-except ImportError:
-    def imsave(filename, im):
-        raise ImportError("imsave not available: Scipy not found")
-
-
 # GEOMETRY
 
 def rotation_matrix(a):
@@ -76,31 +69,30 @@ class Group(Element):
         self.elements=elements
         self.matrix = 1.0*np.eye(3)
 
-
-
     def draw(self,surface):
 
         for e in self.elements:
             new_matrix = self.matrix.dot(e.matrix)
             e.set_matrix(new_matrix).draw(surface)
 
+
 class Surface:
 
     def __init__(self, width,height):
         self.width = width
         self.height = height
-        self.surf = cairo.ImageSurface (cairo.FORMAT_ARGB32, width, height)
+        self.surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, width, height)
 
     def new_context(self):
-        return cairo.Context(self.surf)
+        return cairo.Context(self.surface)
 
-    def to_npimage(self):
-        im = 0+np.frombuffer(self.surf.get_data(), np.uint8)
+    def get_npimage(self):
+        im = 0+np.frombuffer(self.surface.get_data(), np.uint8)
         im.shape = (self.height, self.width, 4)
         return im[:,:,:3]
 
-    def write_imagefile(self, filename):
-        imsave(filename, self.to_npim())
+    def write_to_png(self, filename):
+        self.surface.write_to_png(filename)
 
 
 
@@ -163,4 +155,4 @@ if __name__ == "__main__":
                    stroke_color=white, stroke_width=.02*W).draw(surf)
     for i in range(32):
         g.rotate(i*np.pi/16, center=[.5*W,.5*W]).draw(surf)
-    surf.to_imagefile("/home/vz/Documents/Python/MoviePy/gizeh/test.png")
+    surf.write_to_png("/home/vz/Documents/Python/MoviePy/gizeh/test.png")
