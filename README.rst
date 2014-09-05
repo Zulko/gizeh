@@ -3,6 +3,7 @@ Gizeh - Cairo for tourists
 
 Python has a fast and powerful vector graphics library called PyCairo, but its is difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it easier to use:
 ::
+
     # Let's draw a red circle !
     import gizeh
     surface = gizeh.Surface(width=320, height=260) # in pixels
@@ -18,10 +19,12 @@ Installation
 
 gizeh can be installed by unzipping the source code in one directory and using this command:
 ::
+
     (sudo) python setup.py install
 
 You can also install it directly from the Python Package Index with this command:
 ::
+
     (sudo) pip install gizeh
 
 
@@ -35,6 +38,7 @@ Surfaces
 
 A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw elements, and that you can save as an image:
 ::
+
     import gizeh
     
     # initialize surface
@@ -62,6 +66,7 @@ Basic elements are circles, rectangles, etc., that you can draw on a surface usi
 
 Examples:
 ::
+
     Pi = 3.14
     circ = gizeh.circle(r=30, xy=30, fill_color=(1,1,1))
     rect = gizeh.rectangle(lx=60.3, ly=45, xy=30, fill_color=(0,1,0), angle=Pi/8)
@@ -76,6 +81,7 @@ Any element can be tranformed (translated, rotated or scaled). All transformatio
 
 Examples:
 ::
+
     square_1 = gizeh.square(l=20, xy = [30,35], fill_color=(1,0,0))
     square_2 = square_1.rotate(Pi/8) # rotation around [0,0] by default
     square_3 = square_2.rotate(Pi/4, center=[10,15]) # rotation around a center
@@ -91,15 +97,22 @@ A Group is a collection of elements which will be transformed and drawn together
 
 Examples:
 ::
+
     square = gizeh.square(l=20, fill_color=(1,0,0), xy=(40,40))
     circle = gizeh.circle(r=20, fill_color=(1,2,0), xy=(50,30))
-    group = gizeh.Group([square, circle])
-    
-    gsurface = gizeh.Surface(width=300,height=200)
-    group.draw(surface)
+    group_1 = gizeh.Group([square, circle])
     group_2 = group.translate(xy=[30,30]).rotate(Pi/4)
+    group_3 = gizeh.Group([circle, group_1])
+    
+    surface = gizeh.Surface(width=300,height=200)
+    group.draw(surface)
+    group_1.draw(surface)
     group_2.draw(surface)
+    group_3.draw(surface)
+    surface.write_to_png("my_masterwork.png")
+
 
 That's all folks !
 ~~~~~~~~~~~~~~~~~~~
+
 To go further, see the examples in the `examples` folder or (wishful thinking) on the Web.
