@@ -8,8 +8,9 @@ exec(open('gizeh/version.py').read()) # loads __version__
 setup(name='gizeh',
       version=__version__,
       author='Zulko',
-    description='',
+    description='Simple vector graphics in Python',
     long_description=open('README.rst').read(),
     license='see LICENSE.txt',
-    keywords="",
+    keywords="Cairo vector graphics",
+    requires=['pycairo', 'numpy'],
     packages= find_packages(exclude='docs'))

@@ -134,25 +134,3 @@ def line(points, **kw):
 
 def bezier(points, **kw):
     return shape_element(lambda c:c.arc(0,0, r, a1, a2), **kw)
-
-
-if __name__ == "__main__":
-
-    W,H = 200, 200
-
-    white = np.array([1,1,1])
-    black = np.array([0,0,0])
-    red = np.array([0,0,1])
-
-    surf = Surface(W,H)
-    r1 = rectangle(.2*W,.2*W, xy= [.3*W,.3*W] , fill_color=red, angle=np.pi/8,
-                   stroke_color=white, stroke_width=.02*W)
-    r2 = rectangle(.15*W,.15*W, xy=[.7*W,.7*W], fill_color=black, stroke_color=white,
-                stroke_width=.02*W)
-    g = Group([r1, r2])
-
-    rectangle(.1*W,.1*W, xy= [.5*W,.5*W] , fill_color=red,
-                   stroke_color=white, stroke_width=.02*W).draw(surf)
-    for i in range(32):
-        g.rotate(i*np.pi/16, center=[.5*W,.5*W]).draw(surf)
-    surf.write_to_png("/home/vz/Documents/Python/MoviePy/gizeh/test.png")
