@@ -1,6 +1,22 @@
 import numpy as np
 
 
+
+def rotation_matrix(a):
+    return np.array([[np.cos(a),  -np.sin(a),0],
+                      [np.sin(a),  np.cos(a),0],
+                      [0,          0 ,       1.0]])
+
+def translation_matrix(xy):
+    return np.array([[1.0,0,xy[0]],
+                     [0,1,xy[1]],
+                     [0,0,1]])
+
+def scaling_matrix(sx,sy):
+    return np.array([[sx,0,0],
+                     [0,sy,0],
+                     [0,0,1]])
+
 def polar_polygon(nfaces,radius, npoints):
     theta=np.linspace(0,2*np.pi,npoints)[:-1]
     cos, pi, n = np.cos, np.pi, nfaces

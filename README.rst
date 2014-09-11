@@ -1,18 +1,18 @@
 Gizeh - Cairo for tourists
 ===========================
 
-Python has a fast and powerful vector graphics library called PyCairo, but its is difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it easier to use:
+Python has a fast and powerful vector graphics library called PyCairo, but its is difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive:
 ::
 
     # Let's draw a red circle !
     import gizeh
     surface = gizeh.Surface(width=320, height=260) # in pixels
-    circle = gizeh.circle(r=30, xy= [40,40], fill_color=(1,1,1))
+    circle = gizeh.circle(r=30, xy= [40,40], fill_color=(1,0,0))
     circle.draw(surface)
-    surface.write_to_png("circle.png")
+    surface.write_to_png("circle.png") # And voila !
 
 Gizeh is an open-source software written by Zulko and released under the MIT licence. Everyone is welcome to contribute !
-Keep in mind that it is a very basic package, by someone who hasn't read half of the Cairo manual.
+
 
 Installation
 --------------
@@ -33,10 +33,12 @@ Gizeh depends on the Python packages PyCairo and Numpy. They will both be automa
 User Guide
 -------------
 
+This guide, along with the examples in the `gizeh/examples` folder, should give you everything you need to get started. To go further, read the function docstrings.
+
 Surfaces
 ~~~~~~~~
 
-A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw elements, and that you can save as an image:
+A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw elements, and that you can save or export as an image:
 ::
 
     import gizeh
@@ -48,23 +50,25 @@ A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw
     circle = gizeh.circle(r=30, xy= [40,40], fill_color=(1,1,1))
     circle.draw(surface)
 
-    # No export the surface
-    surface.write_to_png("circle.png") # saves as an image.
+    # Now export the surface
     surface.get_npimage() # returns a (width x height x 3) numpy array
+    surface.scipy_imsave("circle.png") # requires scipy.
+    surface.write_to_png("circle.png") # doesn't require scipy, but image is flipped
+    
 
 
 Elements
 ~~~~~~~~~
 
-Basic elements are circles, rectangles, etc., that you can draw on a surface using `my_element.draw(surface)`. You can specify the properties and coordinates of these elements at creation time:
+Basic elements are circles, rectangles, lines, texts, etc., that you can draw on a surface using `my_element.draw(surface)`. You can specify the properties and coordinates of these elements at creation time:
 
-- `xy` : coordinates of the center of the object. (0,0), which is the defaut, corresponds to the upper left corner of the final picture.
-- `angle` : angle (in radians) of the rotation of the element around it its center `xy`.
-- `fill_color` : the color with which the element will be filled. Default (None) is no fill. The colors are represented by tuples (a,b,c) (for (red, green, blue) where a,b,c are comprised between 0 and 1. For instance (0,0,0) is black, (1,1,1) is white.
-- `stroke_color` : the color of the element's contour.
+- `xy` : coordinates of the center of the object. (0,0), which is the defaut, corresponds to the bottom left corner of the final picture.
+- `angle` : angle (in radians) of the rotation of the element around its center `xy`.
+- `fill` : what will fill the element (default is no fill). Can be a color (R,G,B), a color gradient, an image, etc. See section below.
+- `stroke` : What will fill the element's contour. Same rules as for `fill`.
 - `stroke_width` : the width (in pixels) of the element's contour. Default is 0 (no stroke).
 
-Examples:
+Examples of elements:
 ::
 
     Pi = 3.14
@@ -72,6 +76,31 @@ Examples:
     rect = gizeh.rectangle(lx=60.3, ly=45, xy=30, fill_color=(0,1,0), angle=Pi/8)
     sqr = gizeh.square(l=20, stroke_color=(1,1,1), stroke_width= 1.5)
     arc = gizeh.arc(r=20, a1=Pi/4, a2=3*Pi/4, fill_color=(1,1,1))
+    text = gizeh.text("Hello world", fontfamily="Impact",  fontsize=40,
+                      fontcolor=(1,1,1), xy=(100,100), angle=Pi/12)
+    polygon = gizeh.polygon(r=40, n=5, angle=np.pi/4, xy=[40,50], fill=(1,0,1))
+    line = gizeh.polyline(points=[(0,0), (20,30), (40,40), (0,10)], stroke_width=3,
+                         stroke_color=(1,0,0), fill_color=(0,1,0))
+
+Fill and stroke
+----------------
+
+When you make a shape, the `fill` and `stroke` parameters can be one of the following:
+
+- A RGB color of the form (r,g,b) where each element is comprised between 0 and 1 (1 is 100%).
+- A RGBA colot of the form (r,g,b,a), where `a` is comprised between 0 (totally transparent) and 1 (totally opaque)
+- A color gradient (see section below)
+- A surface: the object will display the content of this surface. In this case the `xy` attribute of the shape really matters, as the element will be filled with the content of the surface in the area on which it stands.
+- A numpy array representing a RGB or RGBA image (not implemented yet)
+- A PNG image file (not implemented yet)
+
+Examples:
+::
+    
+
+Color gradients
+----------------
+
 
 
 Transformations
@@ -90,6 +119,7 @@ Examples:
     square_6 = square_1.scale(2, center=[30,30]) # zoom: scales around a center
     square_7 = square_1.translate(xy=[5,15]) # translation
 
+
 Groups
 ~~~~~~~
 
@@ -104,7 +134,7 @@ Examples:
     group_2 = group.translate(xy=[30,30]).rotate(Pi/4)
     group_3 = gizeh.Group([circle, group_1])
     
-    surface = gizeh.Surface(width=300,height=200)
+    surface = gizeh.ImageSurface(width=300,height=200)
     group.draw(surface)
     group_1.draw(surface)
     group_2.draw(surface)
