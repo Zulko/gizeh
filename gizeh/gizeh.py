@@ -1,4 +1,4 @@
-from copy import deepcopy
+from copy import copy, deepcopy
 from base64 import b64encode
 import numpy as np
 import cairo
@@ -9,29 +9,147 @@ from .geometry import (rotation_matrix,
                        polar2cart)
 
 
+
+
+class Surface:
+    """
+    A Surface is an object on which Elements are drawn, and which can be
+    exported as PNG images, numpy arrays, or be displayed into an IPython Notebook.
+
+    Note that this class is simply a thin wrapper around Cairo's Surface class.
+    """
+
+    def __init__(self, width,height, bg_color=None):
+        self.width = width
+        self.height = height
+        self._cairo_surface = cairo.ImageSurface (cairo.FORMAT_ARGB32,
+                                                 width, height)
+        if bg_color:
+            rectangle(2*width, 2*height, fill=bg_color).draw(self)
+        
+
+    @staticmethod
+    def from_image(image):
+        h, w, d = image.shape
+        if d==4:
+            image = image[:,:,[2,1,0,3]]
+        if d==1:
+            image = np.array(3*[image])
+        elif d==3:
+            image = image[:,:,[2,1,0]]
+            image = np.dstack([image, 255*np.ones((h,w))])
+        sf = Surface(w,h)
+        arr = np.frombuffer(sf._cairo_surface.get_data(),np.uint8)
+        arr += image.flatten()
+        sf._cairo_surface.mark_dirty()
+        return sf
+
+    def get_new_context(self):
+        """ Returns a new context for drawing on the surface."""
+        return cairo.Context(self._cairo_surface)
+
+    def write_to_png(self, filename, y_origin="top"):
+        """ Writes the image to a PNG.
+
+        Parameter y_origin ("top" or "bottom") decides whether point (0,0) lies in
+        the top-left or bottom-left corner of the screen.
+        """ 
+
+        if y_origin == "bottom":
+            W,H = self.width, self.height
+            new_surface = Surface(W,H)
+            rect = (rectangle(2*W,2*H, fill=ImagePattern(self))
+                   .scale(1,-1).translate([0,H]))
+            rect.draw(new_surface)
+            new_surface.write_to_png(filename, y_origin="top")
+        else:
+            self._cairo_surface.write_to_png(filename)
+
+    def get_npimage(self, transparent=False, y_origin="top"):
+        """ Returns a WxHx[3-4] numpy array representing the RGB picture.
+        
+        If `transparent` is True the image is WxHx4 and represents a RGBA picture,
+        i.e. array[i,j] is the [r,g,b,a] value of the pixel at position [i,j].
+        If `transparent` is false, a RGB array is returned.
+
+        Parameter y_origin ("top" or "bottom") decides whether point (0,0) lies in
+        the top-left or bottom-left corner of the screen.
+        """
+
+        im = 0+np.frombuffer(self._cairo_surface.get_data(), np.uint8)
+        im.shape = (self.height, self.width, 4)
+        im = im[:,:,[2,1,0,3]] # put RGB back in order
+        if y_origin== "bottom":
+            im = im[::-1]
+        return im if transparent else im[:,:, :3]
+
+    def get_html_embed_code(self, y_origin="top"):
+        """ Returns an html code containing all the PNG data of the surface. """
+        self.write_to_png("__temp__.png", y_origin=y_origin)
+        with open("__temp__.png", "rb") as f:
+            data= b64encode(f.read())
+        return "<img  src='data:image/png;base64,%s'>"%(data)
+
+    def ipython_display(self, y_origin="top"):
+        """ displays the surface in the IPython notebook.
+
+        Will only work if surface.ipython_display() is written at the end of one
+        of the notebook's cells.
+        """
+
+        from IPython.display import HTML
+        return HTML(self.get_html_embed_code(y_origin=y_origin))
+
+
+
+
 class Element:
+    """
+    Base class for objects that can be transformed (rotated, translated, scaled)
+    and drawn to a Surface.
     
+    Parameter `draw_method` is a function which takes a cairo.Surface.Context()
+    as argument and draws on this context. All Elements are draw on a different
+    context.
+    """
+
     def __init__(self, draw_method):
         self.draw_method = draw_method
         self.matrix = 1.0*np.eye(3)
-
-    def transform_ctx(self, ctx):
+    
+    def _cairo_matrix(self):
+        """ returns the element's matrix in cairo form """
         m = self.matrix
-        ctx.set_matrix(cairo.Matrix(m[0,0],m[1,0], 
-                                   m[0,1],m[1,1],
-                                   m[0,2], m[1,2]))
+        return cairo.Matrix(m[0,0],m[1,0], 
+                             m[0,1],m[1,1],
+                             m[0,2], m[1,2])
+
+    def _transform_ctx(self, ctx):
+        """ Tranform the context before drawing.
+        It applies all the rotation, translation, etc. to the context.
+        In short, it sets the context's matrix to the element's matrix.
+        """
+        ctx.set_matrix(self._cairo_matrix())
     
     def draw(self, surface):
-        ctx = surface.new_context()
-        self.transform_ctx(ctx)
+        """ Draws the Element on a new context of the given Surface """ 
+        ctx = surface.get_new_context()
+        self._transform_ctx(ctx)
         self.draw_method(ctx)
     
     def set_matrix(self, new_mat):
+        """ Returns a copy of the element, with a new transformation matrix """
         new = deepcopy(self)
         new.matrix = new_mat
         return new
 
     def rotate(self, angle, center=[0,0]):
+        """ Rotate the element.
+        
+        Returns a new element obtained by rotating the current element
+        by the given `angle` (unit: rad) around the `center`.
+        """
+
         center=np.array(center)
         mat = (translation_matrix(center)
                .dot(rotation_matrix(angle))
@@ -41,9 +159,21 @@ class Element:
         
     
     def translate(self, xy):
+        """ Translate the element.
+
+        Returns a new element obtained by translating the current element
+        by a vector xy
+        """
         return self.set_matrix(translation_matrix(xy).dot(self.matrix))
 
     def scale(self, rx, ry=None, center=[0,0]):
+        """ Scale the element.
+        
+        Returns a new element obtained by scaling the current element
+        by a factor rx horizontally and ry vertically, with fix point `center`.
+        If ry is not provided it is assumed that rx=ry.
+        """
+
         ry = rx if (ry is None) else ry
         center=np.array(center)
         mat = (translation_matrix(center)
@@ -52,7 +182,14 @@ class Element:
         return self.set_matrix(mat.dot(self.matrix))
 
 
+
+
 class Group(Element):
+    """
+    Class for special Elements made out of a group of other elements which
+    will be translated, scaled, rotated, and drawn together.
+    These elements can be base elements (circles, squares) or even groups.
+    """
 
     def __init__(self, elements):
 
@@ -60,6 +197,7 @@ class Group(Element):
         self.matrix = 1.0*np.eye(3)
 
     def draw(self,surface):
+        """ Draws the group to a new context of the given Surface """
 
         for e in self.elements:
             m = self.matrix
@@ -68,47 +206,27 @@ class Group(Element):
             e.set_matrix(new_matrix).draw(surface)
 
 
-class Surface:
-
-    def __init__(self, width,height):
-        self.width = width
-        self.height = height
-        self.surface = cairo.ImageSurface (cairo.FORMAT_ARGB32, width, height)
-
-    def new_context(self):
-        return cairo.Context(self.surface)
-
-    def write_to_png(self, filename, y_origin="up"):
-
-        if y_origin == "bottom":
-            W,H = self.width, self.height
-            new_surface = Surface(W,H)
-            rect = rectangle(2*W,2*H, fill=self).scale(1,-1).translate([0,H])
-            rect.draw(new_surface)
-            new_surface.write_to_png(filename, y_origin="up")
-        else:
-            self.surface.write_to_png(filename)
-
-    def get_npimage(self, transparent=False, y_origin="up"):
-        im = 0+np.frombuffer(self.surface.get_data(), np.uint8)
-        im.shape = (self.height, self.width, 4)
-        if y_origin== "bottom":
-            im = im[::-1]
-        return im if transparent else im[:,:, :3]
-
-    def get_html_embed_code(self, y_origin="up"):
-        self.write_to_png("__temp__.png", y_origin=y_origin)
-        with open("__temp__.png", "rb") as f:
-            data= b64encode(f.read())
-        return "<center><img  src='data:image/png;base64,%s'></center>"%(data)
-
-    def ipython_display(self, y_origin="up"):
-        from IPython.display import HTML
-        return HTML(self.get_html_embed_code(y_origin=y_origin))
-
-
 
 class ColorGradient:
+    """ This class is more like a structure to store the data for color gradients
+    
+    These gradients are used as sources for filling elements or their borders (see
+    parameters `fill` and `stroke` in `shape_elements`).
+
+    Parameters
+    ------------
+    type
+      Type of gradient: "linear" or "radial"
+
+    xy1, xy2, xy3
+
+    stops_colors
+      For instance, if you want a blue color then a red color then a green color
+      you will write stops_colors=[(0,(1,0,0)), (0.5,(0,1,0)) , (1,(0,0,1))].
+
+    """
+
+
     def __init__(self, type, stops_colors, xy1, xy2, xy3=None):
         self.xy1 = xy1
         self.xy2 = xy2
@@ -118,25 +236,94 @@ class ColorGradient:
             raise ValueError("unkown gradient type")
         self.type = type
 
+    def set_source(self, ctx):
 
-
-def set_source(ctx, src):
-    if isinstance(src, ColorGradient):
-        if src.type == "linear":
-            (x1, y1), (x2, y2) = src.xy1, src.xy2
+        if self.type == "linear":
+            (x1, y1), (x2, y2) = self.xy1, self.xy2
             pat = cairo.LinearGradient(x1, y1, x2, y2)
-        elif src.type == "radial":
-            (x1, y1), (x2, y2), (x2,y3) = src.xy1, src.xy2, src.xy3
+        elif self.type == "radial":
+            (x1, y1), (x2, y2), (x3,y3) = self.xy1, self.xy2, self.xy3
             pat = cairo.RadialGradient(x1, y1, x2, y2, x3, y3)
-        for stop, color in src.stops_colors:
+        for stop, color in self.stops_colors:
             if len(color)==4:
                 pat.add_color_stop_rgba(stop, *color)
             else:
                 pat.add_color_stop_rgb(stop, *color)
         ctx.set_source(pat)
-    elif isinstance(src, Surface):
-        pat = cairo.SurfacePattern(src.surface)
-        ctx.set_source(pat)
+
+
+class ImagePattern:
+    """ Class for images that will be used to fill an element or its contour.
+    
+    image
+      A numpy RGB(A) image.
+    pixel_zero
+      The coordinates of the pixel of the image that will serve as 0,0 origin
+      when filling the element.
+
+    filter
+      Determines the method with which the images are resized:
+        "best": slow but good quality
+        "nearest": takes nearest pixel (can create artifacts)
+        "good": Good and faster than "best"
+        "bilinear": use linear interpolation
+        "fast":fast filter, quality like 'nearest'
+
+    extend
+      Determines what happends outside the boundaries of the picture:
+      "none", "repeat", "reflect", "pad" (pad= use pixel closest from source)
+
+    """
+
+    def __init__(self, image, pixel_zero=[0,0], filter="best", extend="none"):
+        if isinstance(image, Surface):
+            self._cairo_surface = image
+        else:
+            self._cairo_surface = Surface.from_image(image)._cairo_surface
+        self.matrix = translation_matrix(pixel_zero)
+        self.filter = filter
+        self.extend=extend
+    
+    def set_matrix(self, new_mat):
+        """ Returns a copy of the element, with a new transformation matrix """
+        new = copy(self)
+        new.matrix = new_mat
+        return new
+
+    def make_cairo_pattern(self):
+        pat = cairo.SurfacePattern(self._cairo_surface)
+        pat.set_filter({"best": cairo.FILTER_BEST,
+                         "nearest": cairo.FILTER_NEAREST,
+                         "gaussian": cairo.FILTER_GAUSSIAN,
+                         "good": cairo.FILTER_GOOD,
+                         "bilinear":cairo.FILTER_BILINEAR,
+                         "fast":cairo.FILTER_FAST}[self.filter])
+
+        pat.set_extend({"none":cairo.EXTEND_NONE,
+                        "repeat":cairo.EXTEND_REPEAT,
+                        "reflect":cairo.EXTEND_REFLECT,
+                        "pad":cairo.EXTEND_PAD}[self.extend])
+
+        pat.set_matrix(self._cairo_matrix())
+
+        return pat
+
+for meth in ["scale", "rotate", "translate", "_cairo_matrix"]:
+    ImagePattern.__dict__[meth] = Element.__dict__[meth]
+
+
+def _set_source(ctx, src):
+    """ Sets a source before drawing an element.
+    
+    The source is what fills an element (or the element's contour).
+    If can be of many forms. See the documentation of shape_element for more
+    details.
+
+    """
+    if isinstance(src, ColorGradient):
+        src.set_source(ctx)
+    elif isinstance(src, ImagePattern):
+        ctx.set_source(src.make_cairo_pattern())
     elif isinstance(src, np.ndarray):
         string = src.to_string()
         surface = cairo.ImageSurface.create_for_data(string)
@@ -147,21 +334,57 @@ def set_source(ctx, src):
         ctx.set_source_rgb(*src)
 
 
-def shape_element(draw, xy=(0,0), angle=0, fill=None,
+#########################################################################
+# BASE ELEMENTS
+
+def shape_element(draw_contour, xy=(0,0), angle=0, fill=None,
              stroke=(0,0,0), stroke_width=0):
+    """
+    
+    Parameters
+    ------------
+
+    xy
+      vector [x,y] indicating where the Element should be inserted in the drawing.
+      Note that for shapes like circle, square, rectangle, regular_polygon, the
+      [x,y] indicates the *center* of the element. So these elements are centered
+      around 0 by default.
+
+    angle
+      Angle by which to rotate the shape. The rotation uses (0,0) as center point.
+      Therefore all circles, rectangles, squares, and regular_polygons are rotated
+      around their center.
+    
+    fill
+      Defines wath will fill the element. Default is None (no fill). `fill` can
+      be one of the following:
+      - A (r,g,b) color tuple, where 0 =< r,g,b =< 1
+      - A (r,g,b, a) color tuple, where 0=< r,g,b,a =< 1 (a defines the transparency:
+        0 is transparent, 1 is opaque)
+      - A gizeh.ColorGradient object.
+      - A gizeh.Surface
+      - A numpy image (not implemented yet)
+
+    stroke
+      Decides how the stroke (contour) of the element will be filled.
+      Same rules as for argument ``fill``. Default is color black
+
+    stroke_width
+      Width of the stroke, in pixels. Default is 0 (no apparent stroke)
+
+    """
     
     def new_draw(ctx):
+        draw_contour(ctx)
         if fill is not None:
-                draw(ctx)
                 ctx.move_to(*xy)
-                set_source(ctx, fill)
-                ctx.fill()
+                _set_source(ctx, fill)
+                ctx.fill_preserve()
         if stroke_width > 0:
-                draw(ctx)
                 ctx.move_to(*xy)
                 ctx.set_line_width(stroke_width)
-                set_source(ctx, stroke)
-                ctx.stroke()
+                _set_source(ctx, stroke)
+                ctx.stroke_preserve()
 
     return Element(new_draw).rotate(angle).translate(xy)
 
@@ -169,17 +392,18 @@ def shape_element(draw, xy=(0,0), angle=0, fill=None,
 def rectangle(lx, ly, **kw):
     return shape_element(lambda c:c.rectangle(-lx/2, -ly/2, lx, ly), **kw)
 
+
 def square(l, **kw):
     return rectangle(l,l, **kw)
+
 
 def arc(r, a1, a2, **kw):
     return shape_element(lambda c:c.arc(0,0, r, a1, a2), **kw)
 
+
 def circle(r,**kw):
     return arc(r, 0, 2*np.pi, **kw)
 
-def text(r,**kw):
-    return arc(r, 0, 2*np.pi, **kw)
 
 def polyline(points, **kw):
     def draw(ctx):
@@ -188,11 +412,11 @@ def polyline(points, **kw):
             ctx.line_to(*p)
     return shape_element(draw, **kw)
 
-def polygon(r,n, **kw):
+def regular_polygon(r,n, **kw):
     points = [polar2cart(r, a) for a in np.linspace(0,2*np.pi,n+1)]
     return polyline(points, **kw)
 
-def bezier(points, **kw):
+def bezier_curve(points, **kw):
     return shape_element(lambda c:c.arc(0,0, r, a1, a2), **kw)
 
 
@@ -200,13 +424,31 @@ def text(txt, fontfamily, fontsize, fill=(0,0,0),
          h_align = "center", v_align = "center",
          stroke=(0,0,0), stroke_width=0,
          fontweight="normal", fontslant="normal",
-         angle=0, xy=[0,0], y_origin="up"):
+         angle=0, xy=[0,0], y_origin="top"):
     """
+
+    Parameters
+    -----------
+
+    v_align
+      vertical alignment of the text: "top", "center", "bottom"
+    
+    h_align
+      horizontal alignment of the text: "left", "center", "right"
+
     fontweight
       "normal" "bold"
     
     fontslant
       "normal" "oblique" "italic"
+
+    y_origin
+      Adapts the vertical orientation of the text to the coordinates system:
+      if you are going to export the image with y_origin="bottom" (see for
+      instance Surface.write_to_png) then set y_origin to "bottom" here too.
+
+    angle, xy, stroke, stroke_width
+      see the doc for ``shape_element``
     """
 
     fontweight = {"normal": cairo.FONT_WEIGHT_NORMAL,
@@ -225,13 +467,14 @@ def text(txt, fontfamily, fontsize, fill=(0,0,0),
         new_xy = np.array(xy) + np.array([xshift, yshift])
         ctx.move_to(*new_xy)
         ctx.text_path(txt)
-        set_source(ctx, fill)
+        _set_source(ctx, fill)
         ctx.fill() 
         if stroke_width > 0:
             ctx.move_to(*new_xy)
             ctx.text_path(txt)
-            set_source(ctx, stroke)
+            _set_source(ctx, stroke)
             ctx.set_line_width(stroke_width)
             ctx.stroke()
-    return (Element(draw).scale(1,1 if (y_origin=="up") else -1)
+
+    return (Element(draw).scale(1,1 if (y_origin=="top") else -1)
             .rotate(angle))

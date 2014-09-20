@@ -89,18 +89,10 @@ When you make a shape, the `fill` and `stroke` parameters can be one of the foll
 
 - A RGB color of the form (r,g,b) where each element is comprised between 0 and 1 (1 is 100%).
 - A RGBA colot of the form (r,g,b,a), where `a` is comprised between 0 (totally transparent) and 1 (totally opaque)
-- A color gradient (see section below)
-- A surface: the object will display the content of this surface. In this case the `xy` attribute of the shape really matters, as the element will be filled with the content of the surface in the area on which it stands.
+- A gizeh.ColorGradient (see the docstring)
+- A gizeh.ImagePattern, i.e. an image (see the docstring)
 - A numpy array representing a RGB or RGBA image (not implemented yet)
 - A PNG image file (not implemented yet)
-
-Examples:
-::
-    
-
-Color gradients
-----------------
-
 
 
 Transformations
@@ -145,4 +137,5 @@ Examples:
 That's all folks !
 ~~~~~~~~~~~~~~~~~~~
 
+That's about all there is to know.
 To go further, see the examples in the `examples` folder or (wishful thinking) on the Web.
