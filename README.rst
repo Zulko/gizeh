@@ -7,7 +7,7 @@ Python has a fast and powerful vector graphics library called PyCairo, but its i
     # Let's draw a red circle !
     import gizeh
     surface = gizeh.Surface(width=320, height=260) # in pixels
-    circle = gizeh.circle(r=30, xy= [40,40], fill_color=(1,0,0))
+    circle = gizeh.circle(r=30, xy= [40,40], fill=(1,0,0))
     circle.draw(surface)
     surface.write_to_png("circle.png") # And voila !
 
@@ -47,7 +47,7 @@ A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw
     surface = gizeh.Surface(width=320, height=260) # in pixels
 
     # Now make a shape and draw it on the surface
-    circle = gizeh.circle(r=30, xy= [40,40], fill_color=(1,1,1))
+    circle = gizeh.circle(r=30, xy= [40,40], fill=(1,1,1))
     circle.draw(surface)
 
     # Now export the surface
@@ -72,15 +72,15 @@ Examples of elements:
 ::
 
     Pi = 3.14
-    circ = gizeh.circle(r=30, xy=30, fill_color=(1,1,1))
-    rect = gizeh.rectangle(lx=60.3, ly=45, xy=30, fill_color=(0,1,0), angle=Pi/8)
+    circ = gizeh.circle(r=30, xy=30, fill=(1,1,1))
+    rect = gizeh.rectangle(lx=60.3, ly=45, xy=30, fill=(0,1,0), angle=Pi/8)
     sqr = gizeh.square(l=20, stroke_color=(1,1,1), stroke_width= 1.5)
-    arc = gizeh.arc(r=20, a1=Pi/4, a2=3*Pi/4, fill_color=(1,1,1))
+    arc = gizeh.arc(r=20, a1=Pi/4, a2=3*Pi/4, fill=(1,1,1))
     text = gizeh.text("Hello world", fontfamily="Impact",  fontsize=40,
                       fontcolor=(1,1,1), xy=(100,100), angle=Pi/12)
     polygon = gizeh.polygon(r=40, n=5, angle=np.pi/4, xy=[40,50], fill=(1,0,1))
     line = gizeh.polyline(points=[(0,0), (20,30), (40,40), (0,10)], stroke_width=3,
-                         stroke_color=(1,0,0), fill_color=(0,1,0))
+                         stroke_color=(1,0,0), fill=(0,1,0))
 
 Fill and stroke
 ----------------
@@ -88,11 +88,11 @@ Fill and stroke
 When you make a shape, the `fill` and `stroke` parameters can be one of the following:
 
 - A RGB color of the form (r,g,b) where each element is comprised between 0 and 1 (1 is 100%).
-- A RGBA colot of the form (r,g,b,a), where `a` is comprised between 0 (totally transparent) and 1 (totally opaque)
-- A gizeh.ColorGradient (see the docstring)
-- A gizeh.ImagePattern, i.e. an image (see the docstring)
-- A numpy array representing a RGB or RGBA image (not implemented yet)
-- A PNG image file (not implemented yet)
+- A RGBA colot of the form (r,g,b,a), where `a` is comprised between 0 (totally transparent) and 1 (totally opaque).
+- A gizeh.ColorGradient (see the docstring).
+- A gizeh.ImagePattern, i.e. an image (see the docstring).
+- A numpy array representing a RGB or RGBA image (not implemented yet).
+- A PNG image file (not implemented yet).
 
 
 Transformations
@@ -103,7 +103,7 @@ Any element can be tranformed (translated, rotated or scaled). All transformatio
 Examples:
 ::
 
-    square_1 = gizeh.square(l=20, xy = [30,35], fill_color=(1,0,0))
+    square_1 = gizeh.square(l=20, xy = [30,35], fill=(1,0,0))
     square_2 = square_1.rotate(Pi/8) # rotation around [0,0] by default
     square_3 = square_2.rotate(Pi/4, center=[10,15]) # rotation around a center
     square_4 = square_1.scale(2) # two times bigger
@@ -120,13 +120,13 @@ A Group is a collection of elements which will be transformed and drawn together
 Examples:
 ::
 
-    square = gizeh.square(l=20, fill_color=(1,0,0), xy=(40,40))
-    circle = gizeh.circle(r=20, fill_color=(1,2,0), xy=(50,30))
+    square = gizeh.square(l=20, fill=(1,0,0), xy=(40,40))
+    circle = gizeh.circle(r=20, fill=(1,2,0), xy=(50,30))
     group_1 = gizeh.Group([square, circle])
     group_2 = group.translate(xy=[30,30]).rotate(Pi/4)
     group_3 = gizeh.Group([circle, group_1])
     
-    surface = gizeh.ImageSurface(width=300,height=200)
+    surface = gizeh.Surface(width=300,height=200)
     group.draw(surface)
     group_1.draw(surface)
     group_2.draw(surface)
