@@ -405,16 +405,18 @@ def circle(r,**kw):
     return arc(r, 0, 2*np.pi, **kw)
 
 
-def polyline(points, **kw):
+def polyline(points, close_path=False, **kw):
     def draw(ctx):
         ctx.move_to(*points[0])
         for p in points[1:]:
             ctx.line_to(*p)
+        if close_path:
+            ctx.close_path()
     return shape_element(draw, **kw)
 
 def regular_polygon(r,n, **kw):
-    points = [polar2cart(r, a) for a in np.linspace(0,2*np.pi,n+1)]
-    return polyline(points, **kw)
+    points = [polar2cart(r, a) for a in np.linspace(0,2*np.pi,n+1)[:-1]]
+    return polyline(points, close_path=True, **kw)
 
 def bezier_curve(points, **kw):
     return shape_element(lambda c:c.arc(0,0, r, a1, a2), **kw)
