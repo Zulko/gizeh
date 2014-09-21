@@ -1,7 +1,7 @@
 from copy import copy, deepcopy
 from base64 import b64encode
 import numpy as np
-import cairo
+import cairocffi as cairo
 from decorator import decorator
 from .geometry import (rotation_matrix,
                        translation_matrix,
@@ -308,8 +308,9 @@ class ImagePattern:
 
         return pat
 
+
 for meth in ["scale", "rotate", "translate", "_cairo_matrix"]:
-    ImagePattern.__dict__[meth] = Element.__dict__[meth]
+    exec("ImagePattern.%s = Element.%s"%(meth, meth))
 
 
 def _set_source(ctx, src):

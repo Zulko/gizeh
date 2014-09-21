@@ -12,5 +12,5 @@ setup(name='gizeh',
     long_description=open('README.rst').read(),
     license='see LICENSE.txt',
     keywords="Cairo vector graphics",
-    requires=['pycairo', 'numpy'],
+    install_requires=['cairocffi', 'numpy'],
     packages= find_packages(exclude='docs'))

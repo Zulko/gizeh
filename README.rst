@@ -1,21 +1,26 @@
 Gizeh - Cairo for tourists
 ===========================
 
-Python has a fast and powerful vector graphics library called PyCairo, but its is difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive:
+Gizeh is a Python library for vector graphics written on top of `cairocffi`, which is a binding of the popular C library Cairo.
+Cairo is a powerful, but it is difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive:
 ::
 
     # Let's draw a red circle !
     import gizeh
     surface = gizeh.Surface(width=320, height=260) # in pixels
     circle = gizeh.circle(r=30, xy= [40,40], fill=(1,0,0))
-    circle.draw(surface)
-    surface.write_to_png("circle.png") # And voila !
+    circle.draw(surface) # draw the circle on the surface
+    surface.write_to_png("circle.png") # export the surface as a PNG
 
-Gizeh is an open-source software written by Zulko and released under the MIT licence. Everyone is welcome to contribute !
+
+Gizeh is an open-source software written by Zulko_ and released under the MIT licence. The project is hosted on Github_.
+Everyone is welcome to contribute !
 
 
 Installation
 --------------
+
+Gizeh should work on any platform and with python 2 and 3. If you have difficulties installing it, you can ask for help on Github.
 
 gizeh can be installed by unzipping the source code in one directory and using this command:
 ::
@@ -28,7 +33,7 @@ You can also install it directly from the Python Package Index with this command
     (sudo) pip install gizeh
 
 
-Gizeh depends on the Python packages PyCairo and Numpy. They will both be automatically installed (if they aren't already) during the installation of Gizeh.
+Gizeh depends on the Python packages `cairocffi` and `Numpy`. They will both be automatically installed (if they aren't already) during the installation of Gizeh.
 
 User Guide
 -------------
@@ -139,3 +144,6 @@ That's all folks !
 
 That's about all there is to know.
 To go further, see the examples in the `examples` folder or (wishful thinking) on the Web.
+
+.. _Zulko : https://github.com/Zulko
+.. _Github: https://github.com/Zulko/gizeh
