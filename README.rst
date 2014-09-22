@@ -1,8 +1,7 @@
 Gizeh - Cairo for tourists
 ===========================
 
-Gizeh is a Python library for vector graphics written on top of `cairocffi`, which is a binding of the popular C library Cairo.
-Cairo is a powerful, but it is difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive:
+Gizeh is a Python library for vector graphics:
 ::
 
     # Let's draw a red circle !
@@ -12,6 +11,7 @@ Cairo is a powerful, but it is difficult to learn and use. Gizeh implements a fe
     circle.draw(surface) # draw the circle on the surface
     surface.write_to_png("circle.png") # export the surface as a PNG
 
+Gizeh is written on top of the module `cairocffi`, which is a Python binding of the popular C library Cairo. Cairo is powerful, but difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive.
 
 Gizeh is an open-source software written by Zulko_ and released under the MIT licence. The project is hosted on Github_.
 Everyone is welcome to contribute !
@@ -21,19 +21,22 @@ Installation
 --------------
 
 Gizeh should work on any platform and with python 2 and 3. If you have difficulties installing it, you can ask for help on Github.
+Gizeh depends on the Python packages `cairocffi` and `Numpy`. They will both be automatically installed (if they aren't already) during the installation of Gizeh.
 
-gizeh can be installed by unzipping the source code in one directory and using this command:
+**From the source:** Gizeh can be installed by unzipping the source code in some directory and using this command in the same directory:
 ::
 
     (sudo) python setup.py install
 
-You can also install it directly from the Python Package Index with this command:
+**Method with pip:** Alternatively, you can install Gizeh directly from the Python Package Index with this command:
 ::
 
     (sudo) pip install gizeh
 
+This method may fail if ``ez_setup`` is not installed on your computer. In this case install ``ez_setup`` first, with ::
+    
+    (sudo) pip install ez_setup
 
-Gizeh depends on the Python packages `cairocffi` and `Numpy`. They will both be automatically installed (if they aren't already) during the installation of Gizeh.
 
 User Guide
 -------------
