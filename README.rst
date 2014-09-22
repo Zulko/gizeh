@@ -11,11 +11,9 @@ Gizeh is a Python library for vector graphics:
     circle.draw(surface) # draw the circle on the surface
     surface.write_to_png("circle.png") # export the surface as a PNG
 
+You can see examples of Gizeh in action (combined with MoviePy) in `this blog post <http://zulko.github.io/blog/2014/09/20/vector-animations-with-python/>`_.
+
 Gizeh is written on top of the module `cairocffi`, which is a Python binding of the popular C library Cairo. Cairo is powerful, but difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive.
-
-Gizeh is an open-source software written by Zulko_ and released under the MIT licence. The project is hosted on Github_.
-Everyone is welcome to contribute !
-
 
 Installation
 --------------
@@ -36,6 +34,12 @@ Gizeh depends on the Python packages `cairocffi` and `Numpy`. They will both be 
 This method may fail if ``ez_setup`` is not installed on your computer. In this case install ``ez_setup`` first, with ::
     
     (sudo) pip install ez_setup
+
+Contribute !
+-------------
+
+Gizeh is an open-source software written by Zulko_ and released under the MIT licence. The project is hosted on Github_.
+Everyone is welcome to contribute !
 
 
 User Guide
