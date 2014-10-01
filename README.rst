@@ -84,15 +84,15 @@ Examples of elements:
 ::
 
     Pi = 3.14
-    circ = gizeh.circle(r=30, xy=30, fill=(1,1,1))
-    rect = gizeh.rectangle(lx=60.3, ly=45, xy=30, fill=(0,1,0), angle=Pi/8)
-    sqr = gizeh.square(l=20, stroke_color=(1,1,1), stroke_width= 1.5)
+    circ = gizeh.circle(r=30, xy=(50,50), fill=(1,1,1))
+    rect = gizeh.rectangle(lx=60.3, ly=45, xy=(60,70), fill=(0,1,0), angle=Pi/8)
+    sqr = gizeh.square(l=20, stroke=(1,1,1), stroke_width= 1.5)
     arc = gizeh.arc(r=20, a1=Pi/4, a2=3*Pi/4, fill=(1,1,1))
     text = gizeh.text("Hello world", fontfamily="Impact",  fontsize=40,
                       fill=(1,1,1), xy=(100,100), angle=Pi/12)
     polygon = gizeh.polygon(r=40, n=5, angle=np.pi/4, xy=[40,50], fill=(1,0,1))
     line = gizeh.polyline(points=[(0,0), (20,30), (40,40), (0,10)], stroke_width=3,
-                         stroke_color=(1,0,0), fill=(0,1,0))
+                         stroke=(1,0,0), fill=(0,1,0))
 
 Fill and stroke
 ----------------
