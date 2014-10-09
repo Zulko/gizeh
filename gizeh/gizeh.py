@@ -337,8 +337,8 @@ def _set_source(ctx, src):
 #########################################################################
 # BASE ELEMENTS
 
-def shape_element(draw_contour, xy=(0,0), angle=0, fill=None,
-             stroke=(0,0,0), stroke_width=0):
+def shape_element(draw_contour, xy=(0,0), angle=0, fill=None, stroke=(0,0,0),
+                  stroke_width=0, line_cap=None, line_join=None):
     """
     
     Parameters
@@ -372,6 +372,12 @@ def shape_element(draw_contour, xy=(0,0), angle=0, fill=None,
     stroke_width
       Width of the stroke, in pixels. Default is 0 (no apparent stroke)
 
+    line_cap
+      The shape of the ends of the stroke: 'butt' or 'round' or 'square'
+
+    line_join
+      The shape of the 'elbows' of the contour: 'square', 'cut' or 'round'
+
     """
     
     def new_draw(ctx):
@@ -383,6 +389,14 @@ def shape_element(draw_contour, xy=(0,0), angle=0, fill=None,
         if stroke_width > 0:
                 ctx.move_to(*xy)
                 ctx.set_line_width(stroke_width)
+                if line_cap is not None:
+                    ctx.set_line_cap({"butt":  cairo.LINE_CAP_BUTT,
+                                      "round": cairo.LINE_CAP_ROUND,
+                                      "square": cairo.LINE_CAP_SQUARE}[line_cap])
+                if line_join is not None:
+                    ctx.set_line_join({"cut":  cairo.LINE_JOIN_BEVEL,
+                                        "square":cairo.LINE_JOIN_MITER,
+                                        "round":cairo.LINE_JOIN_ROUND}[line_join])
                 _set_source(ctx, stroke)
                 ctx.stroke_preserve()
 
@@ -418,8 +432,8 @@ def regular_polygon(r,n, **kw):
     points = [polar2cart(r, a) for a in np.linspace(0,2*np.pi,n+1)[:-1]]
     return polyline(points, close_path=True, **kw)
 
-def bezier_curve(points, **kw):
-    return shape_element(lambda c:c.arc(0,0, r, a1, a2), **kw)
+#def bezier_curve(points, **kw):
+#    return shape_element(lambda c:c.arc(0,0, r, a1, a2), **kw)
 
 
 def text(txt, fontfamily, fontsize, fill=(0,0,0),
