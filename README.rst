@@ -1,3 +1,7 @@
+.. image:: https://raw.githubusercontent.com/Zulko/gizeh/master/logo.jpeg
+   :alt: [logo]
+   :align: center
+
 Gizeh - Cairo for tourists
 ===========================
 
