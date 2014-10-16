@@ -68,7 +68,6 @@ A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw
 
     # Now export the surface
     surface.get_npimage() # returns a (width x height x 3) numpy array
-    surface.scipy_imsave("circle.png") # requires scipy.
     surface.write_to_png("circle.png") # doesn't require scipy, but image is flipped
     
 
