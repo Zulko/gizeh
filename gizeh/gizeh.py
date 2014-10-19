@@ -8,8 +8,6 @@ from .geometry import (rotation_matrix,
                        polar2cart)
 
 
-
-
 class Surface:
     """
     A Surface is an object on which Elements are drawn, and which can be
@@ -324,7 +322,7 @@ def _set_source(ctx, src):
         src.set_source(ctx)
     elif isinstance(src, ImagePattern):
         ctx.set_source(src.make_cairo_pattern())
-    elif isinstance(src, np.ndarray):
+    elif isinstance(src, np.ndarray) and len(src.shape)>1:
         string = src.to_string()
         surface = cairo.ImageSurface.create_for_data(string)
         set_source(ctx, surface)
@@ -434,6 +432,17 @@ def regular_polygon(r,n, **kw):
 
 #def bezier_curve(points, **kw):
 #    return shape_element(lambda c:c.arc(0,0, r, a1, a2), **kw)
+
+def star(nbranches=5, radius=1.0, ratio=0.5, **kwargs):
+    """ This function draws a star with the given number of branches,
+    radius, and ratio between branches and body. It accepts the usual
+    parameters xy, angle, fill, etc. """
+
+    rr= radius*np.array(nbranches*[1.0,ratio])
+    aa = np.linspace(0,2*np.pi,2*nbranches+1)[:-1]
+    points = polar2cart(rr,aa)
+    return polyline(points, close_path=True, **kwargs)
+
 
 
 def text(txt, fontfamily, fontsize, fill=(0,0,0),

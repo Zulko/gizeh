@@ -15,15 +15,15 @@ Gizeh is a Python library for vector graphics:
     circle.draw(surface) # draw the circle on the surface
     surface.write_to_png("circle.png") # export the surface as a PNG
 
-You can see examples of Gizeh in action (combined with MoviePy) in `this blog post <http://zulko.github.io/blog/2014/09/20/vector-animations-with-python/>`_.
+You can see examples of Gizeh in action (combined with MoviePy to make animations) in `this blog post <http://zulko.github.io/blog/2014/09/20/vector-animations-with-python/>`_.
 
-Gizeh is written on top of the module `cairocffi`, which is a Python binding of the popular C library Cairo. Cairo is powerful, but difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive.
+Gizeh is written on top of the module ``cairocffi``, which is a Python binding of the popular C library Cairo. Cairo is powerful, but difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive.
 
 Installation
 --------------
 
 Gizeh should work on any platform and with python 2 and 3. If you have difficulties installing it, you can ask for help on Github.
-Gizeh depends on the Python packages `cairocffi` and `Numpy`. They will both be automatically installed (if they aren't already) during the installation of Gizeh.
+Gizeh depends on the Python packages ``cairocffi`` and ``Numpy``. They will both be automatically installed (if they aren't already) during the installation of Gizeh. If you have trouble with the installation, head to the last section of this Readme for troubleshooting.
 
 **From the source:** Gizeh can be installed by unzipping the source code in some directory and using this command in the same directory:
 ::
@@ -49,7 +49,7 @@ Everyone is welcome to contribute !
 User Guide
 -------------
 
-This guide, along with the examples in the `gizeh/examples` folder, should give you everything you need to get started. To go further, read the function docstrings.
+This guide, along with the examples in the ``gizeh/examples`` folder, should give you everything you need to get started. To go further, read the function docstrings.
 
 Surfaces
 ~~~~~~~~
@@ -68,20 +68,20 @@ A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw
 
     # Now export the surface
     surface.get_npimage() # returns a (width x height x 3) numpy array
-    surface.write_to_png("circle.png") # doesn't require scipy, but image is flipped
+    surface.write_to_png("circle.png")
     
 
 
 Elements
 ~~~~~~~~~
 
-Basic elements are circles, rectangles, lines, texts, etc., that you can draw on a surface using `my_element.draw(surface)`. You can specify the properties and coordinates of these elements at creation time:
+Basic elements are circles, rectangles, lines, texts, etc., that you can draw on a surface using ``my_element.draw(surface)``. You can specify the properties and coordinates of these elements at creation time:
 
-- `xy` : coordinates of the center of the object. (0,0), which is the defaut, corresponds to the bottom left corner of the final picture.
-- `angle` : angle (in radians) of the rotation of the element around its center `xy`.
-- `fill` : what will fill the element (default is no fill). Can be a color (R,G,B), a color gradient, an image, etc. See section below.
-- `stroke` : What will fill the element's contour. Same rules as for `fill`.
-- `stroke_width` : the width (in pixels) of the element's contour. Default is 0 (no stroke).
+- ``xy`` : coordinates of the center of the object. At rendering time (in function ``surface.write_to_png``) you can set the parameter ``y_origin`` to ``top`` (default) or ``bottom``. If you leave it to ``top``, (0,0) corresponds to the upper left corner of the final picture, and the bottom right corner has coordinates (width, height). If you choose ``y_origin=bottom``, (0,0) will be at the bottom left of the picture (like in a standard plot) and (width, height) will be at the upper right corner.
+- ``angle`` : angle (in radians) of the rotation of the element around its center ``xy``.
+- ``fill`` : what will fill the element (default is no fill). Can be a color (R,G,B), a color gradient, an image, etc. See section below.
+- ``stroke`` : What will fill the element's contour. Same rules as for ``fill``.
+- ``stroke_width`` : the width (in pixels) of the element's contour. Default is 0 (no stroke).
 
 Examples of elements:
 ::
@@ -100,10 +100,10 @@ Examples of elements:
 Fill and stroke
 ----------------
 
-When you make a shape, the `fill` and `stroke` parameters can be one of the following:
+When you make a shape, the ``fill`` and ``stroke`` parameters can be one of the following:
 
 - A RGB color of the form (r,g,b) where each element is comprised between 0 and 1 (1 is 100%).
-- A RGBA colot of the form (r,g,b,a), where `a` is comprised between 0 (totally transparent) and 1 (totally opaque).
+- A RGBA colot of the form (r,g,b,a), where ``a`` is comprised between 0 (totally transparent) and 1 (totally opaque).
 - A gizeh.ColorGradient (see the docstring).
 - A gizeh.ImagePattern, i.e. an image (see the docstring).
 - A numpy array representing a RGB or RGBA image (not implemented yet).
@@ -153,7 +153,36 @@ That's all folks !
 ~~~~~~~~~~~~~~~~~~~
 
 That's about all there is to know.
-To go further, see the examples in the `examples` folder or (wishful thinking) on the Web.
+To go further, see the examples in the ``examples`` folder or (wishful thinking) on the Web.
 
 .. _Zulko : https://github.com/Zulko
 .. _Github: https://github.com/Zulko/gizeh
+
+
+Installation support
+---------------------
+
+Sometimes the installation through `pip` fails because
+
+Some people have ad problems to install ``cairocffi``, Here is how they solved
+their problem:
+
+On Debian/Ubuntu ::
+
+    sudo apt-get install python-dev python-pip ffmpeg libffi-dev
+    sudo pip install gizeh
+
+On macOSX ::
+    
+    pip install ez_setup
+
+   
+    brew install pkg-config libffi
+    export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
+
+    # go to https://xquartz.macosforge.org and download and install XQuartz,
+    # which is needed for cairo, then...
+    brew install cairo
+
+    pip install gizeh
+

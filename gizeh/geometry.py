@@ -18,6 +18,9 @@ def scaling_matrix(sx,sy):
                      [0,0,1]])
 
 def polar_polygon(nfaces,radius, npoints):
+    """ Returns the (x,y) coordinates of n points regularly spaced
+    along a regular polygon of `nfaces` faces and given radius.
+    """
     theta=np.linspace(0,2*np.pi,npoints)[:-1]
     cos, pi, n = np.cos, np.pi, nfaces
     r= cos( pi/n )/cos((theta%(2*pi/n))-pi/n)
@@ -26,4 +29,10 @@ def polar_polygon(nfaces,radius, npoints):
     return zip(radius*r, theta, d)
 
 def polar2cart(r,theta):
-    return r*np.array([np.cos(theta), np.sin(theta)])
+    """ Transforms polar coodinates into cartesian coordinates (x,y).
+    If r or theta or both are vectors, returns a np. array of the list
+    [(x1,y1),(x2,y2),etc...]
+    """
+
+    res =  r*np.array([np.cos(theta), np.sin(theta)])
+    return res if len(res.shape)==1 else res.T
