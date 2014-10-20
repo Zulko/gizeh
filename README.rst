@@ -106,7 +106,7 @@ Fill and stroke
 When you make a shape, the ``fill`` and ``stroke`` parameters can be one of the following:
 
 - A RGB color of the form (r,g,b) where each element is comprised between 0 and 1 (1 is 100%).
-- A RGBA colot of the form (r,g,b,a), where ``a`` is comprised between 0 (totally transparent) and 1 (totally opaque).
+- A RGBA color of the form (r,g,b,a), where ``a`` is comprised between 0 (totally transparent) and 1 (totally opaque).
 - A gizeh.ColorGradient (see the docstring).
 - A gizeh.ImagePattern, i.e. an image (see the docstring).
 - A numpy array representing a RGB or RGBA image (not implemented yet).
@@ -116,7 +116,7 @@ When you make a shape, the ``fill`` and ``stroke`` parameters can be one of the 
 Transformations
 ~~~~~~~~~~~~~~~~
 
-Any element can be tranformed (translated, rotated or scaled). All transformations are *outplace*: they do not modify the original element, they create a modified version of it.
+Any element can be transformed (translated, rotated or scaled). All transformations are *outplace*: they do not modify the original element, they create a modified version of it.
 
 Examples:
 ::
@@ -164,7 +164,7 @@ Installation support
 
 Sometimes the installation through `pip` fails because
 
-Some people have ad problems to install ``cairocffi``, Here is how they solved
+Some people have had problems to install ``cairocffi``, Here is how they solved
 their problem:
 
 On Debian/Ubuntu ::
