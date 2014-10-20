@@ -17,20 +17,23 @@ Gizeh is a Python library for vector graphics:
 
 You can see examples of Gizeh in action (combined with MoviePy to make animations) in `this blog post <http://zulko.github.io/blog/2014/09/20/vector-animations-with-python/>`_.
 
-Gizeh is written on top of the module ``cairocffi``, which is a Python binding of the popular C library Cairo. Cairo is powerful, but difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive.
+Gizeh is written on top of the module ``cairocffi``, which is a Python binding of the popular C library Cairo_. Cairo is powerful, but difficult to learn and use. Gizeh implements a few classes on top of Cairo that make it more intuitive.
+
+Gizeh should work on any platform and with python 2 and 3.
 
 Installation
 --------------
 
-Gizeh should work on any platform and with python 2 and 3. If you have difficulties installing it, you can ask for help on Github.
-Gizeh depends on the Python packages ``cairocffi`` and ``Numpy``. They will both be automatically installed (if they aren't already) during the installation of Gizeh. If you have trouble with the installation, head to the last section of this Readme for troubleshooting.
+To use Gizeh you must first install Cairo_ on your computer (see their website).
 
-**From the source:** Gizeh can be installed by unzipping the source code in some directory and using this command in the same directory:
+Gizeh depends on the Python packages ``cairocffi`` and ``Numpy``. They will both be automatically installed (if they aren't already) during the installation of Gizeh. If you have trouble with the installation, head to the last section of this README for troubleshooting. If it doesn't help, you can ask for help on Github.
+
+**Installation from the sources:** Gizeh can be installed by unzipping the source code in some directory and using this command in the same directory:
 ::
 
     (sudo) python setup.py install
 
-**Method with pip:** Alternatively, you can install Gizeh directly from the Python Package Index with this command:
+**Installation with pip:** Alternatively, you can install Gizeh directly from the Python Package Index with this command:
 ::
 
     (sudo) pip install gizeh
@@ -155,9 +158,6 @@ That's all folks !
 That's about all there is to know.
 To go further, see the examples in the ``examples`` folder or (wishful thinking) on the Web.
 
-.. _Zulko : https://github.com/Zulko
-.. _Github: https://github.com/Zulko/gizeh
-
 
 Installation support
 ---------------------
@@ -185,4 +185,8 @@ On macOSX ::
     brew install cairo
 
     pip install gizeh
+
+.. _Zulko : https://github.com/Zulko
+.. _Github: https://github.com/Zulko/gizeh
+.. _Cairo:  http://cairographics.org/ 
 

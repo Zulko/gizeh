@@ -249,7 +249,7 @@ class ColorGradient:
         ctx.set_source(pat)
 
 
-class ImagePattern:
+class ImagePattern(Element):
     """ Class for images that will be used to fill an element or its contour.
     
     image
