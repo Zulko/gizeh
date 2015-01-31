@@ -25,6 +25,7 @@ txt.draw(surface)
 
 gradient=gz.ColorGradient('radial', [(0,(.3,.2,.8)),(1,(.4,.6,.8))],
                       xy1=(0,0), xy2=(0,r/3), xy3=(0,r))
+
 triangle = gz.regular_polygon(r, n=3,fill=gradient, stroke=(0,0,0),
                               stroke_width=3, xy = (r,0))
 

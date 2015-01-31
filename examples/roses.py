@@ -23,7 +23,7 @@ rose_radius = 30
 
 def position(d, n):
     """ Defines the (x,y) position of the rose(d,n)."""
-    return [1.1*(2*i-.6)*rose_radius for i in [d, n]]
+    return [(1.1*(2*i-.6) * rose_radius) for i in [d, n]]
 
 W, H = [int(c+2*rose_radius) for c in position(max_d,max_n)] 
 
