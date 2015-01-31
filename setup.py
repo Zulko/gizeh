@@ -1,5 +1,13 @@
-import ez_setup
-ez_setup.use_setuptools()
+try:
+    from setuptools import setup
+except ImportError:
+    try:
+        import ez_setup
+        ez_setup.use_setuptools()
+    except ImportError:
+        raise ImportError("Gizeh could not be installed, probably because"
+            " neither setuptools nor ez_setup are installed on this computer."
+            "\nInstall ez_setup ([sudo] pip install ez_setup) and try again.")
 
 from setuptools import setup, find_packages
 
