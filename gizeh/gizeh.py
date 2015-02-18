@@ -6,6 +6,8 @@ from .geometry import (rotation_matrix,
                        translation_matrix,
                        scaling_matrix,
                        polar2cart)
+from itertools import chain
+from math import sqrt
 
 
 class Surface:
@@ -430,8 +432,49 @@ def regular_polygon(r,n, **kw):
     points = [polar2cart(r, a) for a in np.linspace(0,2*np.pi,n+1)[:-1]]
     return polyline(points, close_path=True, **kw)
 
-#def bezier_curve(points, **kw):
-#    return shape_element(lambda c:c.arc(0,0, r, a1, a2), **kw)
+def bezier_curve(points, **kw):
+    '''Create cubic Bezier curve
+    
+    points
+      List of four (x,y) tuples specifying the points of the curve.
+    '''
+    def draw(ctx):
+        ctx.move_to(*points[0])
+        ctx.curve_to(*tuple(chain(*points))[2:])
+    return shape_element(draw, **kw)
+    
+def ellipse(w, h, **kw):
+    '''Create an ellipse.
+    
+    w, h
+      These are used to set the control points for the first quarter
+      of the ellipse.
+    '''
+    
+    # Bezier control points for a quarter of an ellipse.
+    ctrl_pnts = [((w/2),0), ((w/2),(h/2)*(4/3)*(sqrt(2)-1)),
+                 ((w/2)*(4/3)*(sqrt(2)-1),(h/2)), (0,(h/2))]
+                 
+    # Create a list, all_points, which will be populated with lists of control
+    # points for 4 Bezier curves that will approximate the ellipse.
+    all_points = []
+    for i in [1,-1]:
+        for j in [1,-1]:
+            all_points.append([(pnt[0]*i,pnt[1]*(-j)) for pnt in ctrl_pnts])
+    # Permutes the last three lists to put the curves in correct order
+    all_points.append(all_points.pop(1))
+    # Correct the order of the two sublists defining their respective quarter
+    # pieces of the ellipse so that the whole ellipse is drawn in order
+    all_points[1].reverse() 
+    all_points[3].reverse()
+    
+    def draw(ctx):
+        ctx.move_to(*ctrl_pnts[0])
+        for points in all_points:
+            ctx.curve_to(*tuple(chain(*points))[2:])
+        ctx.close_path()
+    
+    return shape_element(draw, **kw)
 
 def star(nbranches=5, radius=1.0, ratio=0.5, **kwargs):
     """ This function draws a star with the given number of branches,
