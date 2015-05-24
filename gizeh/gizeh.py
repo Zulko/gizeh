@@ -9,6 +9,14 @@ from .geometry import (rotation_matrix,
 from itertools import chain
 from math import sqrt
 
+try:
+    from cStringIO import StringIO
+except ImportError:
+    try:
+        from StringIO import StringIO
+    except ImportError:
+        # Python 3 compatibility
+        from io import BytesIO as StringIO
 
 class Surface:
     """
@@ -84,9 +92,8 @@ class Surface:
 
     def get_html_embed_code(self, y_origin="top"):
         """ Returns an html code containing all the PNG data of the surface. """
-        self.write_to_png("__temp__.png", y_origin=y_origin)
-        with open("__temp__.png", "rb") as f:
-            data= b64encode(f.read())
+        png_data = self._repr_png_()
+        data = b64encode(png_data).decode('utf-8')
         return "<img  src='data:image/png;base64,%s'>"%(data)
 
     def ipython_display(self, y_origin="top"):
@@ -99,7 +106,14 @@ class Surface:
         from IPython.display import HTML
         return HTML(self.get_html_embed_code(y_origin=y_origin))
 
+    def _repr_html_(self):
+        return self.get_html_embed_code()
 
+    def _repr_png_(self):
+        """ Returns the raw PNG data to be displayed in the IPython notebook"""
+        data = StringIO()
+        self.write_to_png(data)
+        return data.getvalue()
 
 
 class Element:
