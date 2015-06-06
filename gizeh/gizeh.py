@@ -92,7 +92,7 @@ class Surface:
 
     def get_html_embed_code(self, y_origin="top"):
         """ Returns an html code containing all the PNG data of the surface. """
-        png_data = self._repr_png_()
+        png_data = self._repr_png_(y_origin=y_origin)
         data = b64encode(png_data).decode('utf-8')
         return "<img  src='data:image/png;base64,%s'>"%(data)
 
@@ -109,10 +109,10 @@ class Surface:
     def _repr_html_(self):
         return self.get_html_embed_code()
 
-    def _repr_png_(self):
+    def _repr_png_(self, y_origin="top"):
         """ Returns the raw PNG data to be displayed in the IPython notebook"""
         data = StringIO()
-        self.write_to_png(data)
+        self.write_to_png(data, y_origin=y_origin)
         return data.getvalue()
 
 
