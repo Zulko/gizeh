@@ -557,6 +557,5 @@ def text(txt, fontfamily, fontsize, fill=(0,0,0),
             _set_source(ctx, stroke)
             ctx.set_line_width(stroke_width)
             ctx.stroke()
-
-    return (Element(draw).scale(1,1 if (y_origin=="top") else -1)
+    return (Element(draw).scale(1,1 if (y_origin=="top") else -1, center=xy)
             .rotate(angle))
