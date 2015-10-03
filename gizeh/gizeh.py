@@ -33,7 +33,7 @@ class Surface:
                                                  width, height)
         if bg_color:
             rectangle(2*width, 2*height, fill=bg_color).draw(self)
-        
+
 
     @staticmethod
     def from_image(image):
@@ -60,7 +60,7 @@ class Surface:
 
         Parameter y_origin ("top" or "bottom") decides whether point (0,0) lies in
         the top-left or bottom-left corner of the screen.
-        """ 
+        """
 
         if y_origin == "bottom":
             W,H = self.width, self.height
@@ -74,7 +74,7 @@ class Surface:
 
     def get_npimage(self, transparent=False, y_origin="top"):
         """ Returns a WxHx[3-4] numpy array representing the RGB picture.
-        
+
         If `transparent` is True the image is WxHx4 and represents a RGBA picture,
         i.e. array[i,j] is the [r,g,b,a] value of the pixel at position [i,j].
         If `transparent` is false, a RGB array is returned.
@@ -120,7 +120,7 @@ class Element:
     """
     Base class for objects that can be transformed (rotated, translated, scaled)
     and drawn to a Surface.
-    
+
     Parameter `draw_method` is a function which takes a cairo.Surface.Context()
     as argument and draws on this context. All Elements are draw on a different
     context.
@@ -129,11 +129,11 @@ class Element:
     def __init__(self, draw_method):
         self.draw_method = draw_method
         self.matrix = 1.0*np.eye(3)
-    
+
     def _cairo_matrix(self):
         """ returns the element's matrix in cairo form """
         m = self.matrix
-        return cairo.Matrix(m[0,0],m[1,0], 
+        return cairo.Matrix(m[0,0],m[1,0],
                              m[0,1],m[1,1],
                              m[0,2], m[1,2])
 
@@ -143,13 +143,13 @@ class Element:
         In short, it sets the context's matrix to the element's matrix.
         """
         ctx.set_matrix(self._cairo_matrix())
-    
+
     def draw(self, surface):
-        """ Draws the Element on a new context of the given Surface """ 
+        """ Draws the Element on a new context of the given Surface """
         ctx = surface.get_new_context()
         self._transform_ctx(ctx)
         self.draw_method(ctx)
-    
+
     def set_matrix(self, new_mat):
         """ Returns a copy of the element, with a new transformation matrix """
         new = deepcopy(self)
@@ -158,7 +158,7 @@ class Element:
 
     def rotate(self, angle, center=[0,0]):
         """ Rotate the element.
-        
+
         Returns a new element obtained by rotating the current element
         by the given `angle` (unit: rad) around the `center`.
         """
@@ -167,10 +167,10 @@ class Element:
         mat = (translation_matrix(center)
                .dot(rotation_matrix(angle))
                .dot(translation_matrix(-center)))
-        
+
         return self.set_matrix(mat.dot(self.matrix))
-        
-    
+
+
     def translate(self, xy):
         """ Translate the element.
 
@@ -181,7 +181,7 @@ class Element:
 
     def scale(self, rx, ry=None, center=[0,0]):
         """ Scale the element.
-        
+
         Returns a new element obtained by scaling the current element
         by a factor rx horizontally and ry vertically, with fix point `center`.
         If ry is not provided it is assumed that rx=ry.
@@ -222,7 +222,7 @@ class Group(Element):
 
 class ColorGradient:
     """ This class is more like a structure to store the data for color gradients
-    
+
     These gradients are used as sources for filling elements or their borders (see
     parameters `fill` and `stroke` in `shape_elements`).
 
@@ -267,7 +267,7 @@ class ColorGradient:
 
 class ImagePattern(Element):
     """ Class for images that will be used to fill an element or its contour.
-    
+
     image
       A numpy RGB(A) image.
     pixel_zero
@@ -296,7 +296,7 @@ class ImagePattern(Element):
         self.matrix = translation_matrix(pixel_zero)
         self.filter = filter
         self.extend=extend
-    
+
     def set_matrix(self, new_mat):
         """ Returns a copy of the element, with a new transformation matrix """
         new = copy(self)
@@ -328,7 +328,7 @@ for meth in ["scale", "rotate", "translate", "_cairo_matrix"]:
 
 def _set_source(ctx, src):
     """ Sets a source before drawing an element.
-    
+
     The source is what fills an element (or the element's contour).
     If can be of many forms. See the documentation of shape_element for more
     details.
@@ -354,7 +354,7 @@ def _set_source(ctx, src):
 def shape_element(draw_contour, xy=(0,0), angle=0, fill=None, stroke=(0,0,0),
                   stroke_width=0, line_cap=None, line_join=None):
     """
-    
+
     Parameters
     ------------
 
@@ -368,7 +368,7 @@ def shape_element(draw_contour, xy=(0,0), angle=0, fill=None, stroke=(0,0,0),
       Angle by which to rotate the shape. The rotation uses (0,0) as center point.
       Therefore all circles, rectangles, squares, and regular_polygons are rotated
       around their center.
-    
+
     fill
       Defines wath will fill the element. Default is None (no fill). `fill` can
       be one of the following:
@@ -393,7 +393,7 @@ def shape_element(draw_contour, xy=(0,0), angle=0, fill=None, stroke=(0,0,0),
       The shape of the 'elbows' of the contour: 'square', 'cut' or 'round'
 
     """
-    
+
     def new_draw(ctx):
         draw_contour(ctx)
         if fill is not None:
@@ -448,7 +448,7 @@ def regular_polygon(r,n, **kw):
 
 def bezier_curve(points, **kw):
     '''Create cubic Bezier curve
-    
+
     points
       List of four (x,y) tuples specifying the points of the curve.
     '''
@@ -456,19 +456,19 @@ def bezier_curve(points, **kw):
         ctx.move_to(*points[0])
         ctx.curve_to(*tuple(chain(*points))[2:])
     return shape_element(draw, **kw)
-    
+
 def ellipse(w, h, **kw):
     '''Create an ellipse.
-    
+
     w, h
       These are used to set the control points for the first quarter
       of the ellipse.
     '''
-    
+
     # Bezier control points for a quarter of an ellipse.
     ctrl_pnts = [((w/2),0), ((w/2),(h/2)*(4/3)*(sqrt(2)-1)),
                  ((w/2)*(4/3)*(sqrt(2)-1),(h/2)), (0,(h/2))]
-                 
+
     # Create a list, all_points, which will be populated with lists of control
     # points for 4 Bezier curves that will approximate the ellipse.
     all_points = []
@@ -479,15 +479,15 @@ def ellipse(w, h, **kw):
     all_points.append(all_points.pop(1))
     # Correct the order of the two sublists defining their respective quarter
     # pieces of the ellipse so that the whole ellipse is drawn in order
-    all_points[1].reverse() 
+    all_points[1].reverse()
     all_points[3].reverse()
-    
+
     def draw(ctx):
         ctx.move_to(*ctrl_pnts[0])
         for points in all_points:
             ctx.curve_to(*tuple(chain(*points))[2:])
         ctx.close_path()
-    
+
     return shape_element(draw, **kw)
 
 def star(nbranches=5, radius=1.0, ratio=0.5, **kwargs):
@@ -514,13 +514,13 @@ def text(txt, fontfamily, fontsize, fill=(0,0,0),
 
     v_align
       vertical alignment of the text: "top", "center", "bottom"
-    
+
     h_align
       horizontal alignment of the text: "left", "center", "right"
 
     fontweight
       "normal" "bold"
-    
+
     fontslant
       "normal" "oblique" "italic"
 
@@ -550,7 +550,7 @@ def text(txt, fontfamily, fontsize, fill=(0,0,0),
         ctx.move_to(*new_xy)
         ctx.text_path(txt)
         _set_source(ctx, fill)
-        ctx.fill() 
+        ctx.fill()
         if stroke_width > 0:
             ctx.move_to(*new_xy)
             ctx.text_path(txt)
