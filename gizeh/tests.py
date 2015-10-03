@@ -3,6 +3,7 @@ Tests for Gizeh
 """
 
 import gizeh as gz
+import os
 
 
 def test_pdfsurface():
@@ -32,3 +33,6 @@ def test_pdfsurface():
     # Write file and close surface
     s.flush()
     s.finish()
+
+    # Delete test PDF
+    os.remove("pdfsurface_test.pdf")
