@@ -24,7 +24,7 @@ def test_pdfsurface():
                   xy=(im_size//2,im_size//2))
 
     # Create pdf surface
-    s = gx.PDFSurface("pdfsurface_test.pdf", im_size, im_size)
+    s = gz.PDFSurface("pdfsurface_test.pdf", im_size, im_size)
     # Draw shape on the PDF surface
     shape.draw(s)
     txt.draw(s)
