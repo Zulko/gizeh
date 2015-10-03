@@ -116,6 +116,26 @@ class Surface:
         return data.getvalue()
 
 
+class PDFSurface(object):
+    """Simple class to allow Gizeh to create PDF figures."""
+    def __init__(self, name, width, height, bg_color=None):
+        self.width = width
+        self.height = height
+        self._cairo_surface = cairo.PDFSurface(name, width, height)
+
+    def get_new_context(self):
+        """ Returns a new context for drawing on the surface."""
+        return cairo.Context(self._cairo_surface)
+
+    def flush(self):
+        """Write the file"""
+        self._cairo_surface.flush()
+
+    def finish(self):
+        """Close the surface"""
+        self._cairo_surface.finish()
+
+
 class Element:
     """
     Base class for objects that can be transformed (rotated, translated, scaled)
