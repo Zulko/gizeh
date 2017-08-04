@@ -260,10 +260,11 @@ class ColorGradient:
     """
 
 
-    def __init__(self, type, stops_colors, xy1, xy2, xy3=None):
+    def __init__(self, type, stops_colors, xy1, xy2, r1=None, r2=None):
         self.xy1 = xy1
         self.xy2 = xy2
-        self.xy3= xy3
+        self.r1 = r1
+        self.r2 = r2
         self.stops_colors = stops_colors
         if type not in ["radial", "linear"]:
             raise ValueError("unkown gradient type")
@@ -275,8 +276,9 @@ class ColorGradient:
             (x1, y1), (x2, y2) = self.xy1, self.xy2
             pat = cairo.LinearGradient(x1, y1, x2, y2)
         elif self.type == "radial":
-            (x1, y1), (x2, y2), (x3,y3) = self.xy1, self.xy2, self.xy3
-            pat = cairo.RadialGradient(x1, y1, x2, y2, x3, y3)
+            (x1, y1), (x2, y2) = self.xy1, self.xy2
+            (r1, r2) = self.r1, self.r2
+            pat = cairo.RadialGradient(x1, y1, r1, x2, y2, r2)
         for stop, color in self.stops_colors:
             if len(color)==4:
                 pat.add_color_stop_rgba(stop, *color)
@@ -372,7 +374,7 @@ def _set_source(ctx, src):
 # BASE ELEMENTS
 
 def shape_element(draw_contour, xy=(0,0), angle=0, fill=None, stroke=(0,0,0),
-                  stroke_width=0, line_cap=None, line_join=None):
+                  stroke_width=0, stroke_dash=[], line_cap=None, line_join=None):
     """
 
     Parameters
@@ -423,6 +425,7 @@ def shape_element(draw_contour, xy=(0,0), angle=0, fill=None, stroke=(0,0,0),
         if stroke_width > 0:
                 ctx.move_to(*xy)
                 ctx.set_line_width(stroke_width)
+                ctx.set_dash(stroke_dash)
                 if line_cap is not None:
                     ctx.set_line_cap({"butt":  cairo.LINE_CAP_BUTT,
                                       "round": cairo.LINE_CAP_ROUND,
