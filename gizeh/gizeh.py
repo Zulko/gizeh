@@ -439,6 +439,10 @@ def shape_element(draw_contour, xy=(0, 0), angle=0, fill=None, stroke=(0, 0, 0),
 
     if angle == 0 and xy == (0,0):
         return Element(new_draw)
+    elif angle == 0:
+        return Element(new_draw).translate(xy)
+    elif xy == (0,0)
+        return Element(new_draw).rotate(angle)
     else:
         return Element(new_draw).rotate(angle).translate(xy)
 
