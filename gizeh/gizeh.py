@@ -437,7 +437,10 @@ def shape_element(draw_contour, xy=(0, 0), angle=0, fill=None, stroke=(0, 0, 0),
             _set_source(ctx, stroke)
             ctx.stroke_preserve()
 
-    return Element(new_draw).rotate(angle).translate(xy)
+    if angle == 0 and xy == (0,0):
+        return Element(new_draw)
+    else:
+        return Element(new_draw).rotate(angle).translate(xy)
 
 
 def rectangle(lx, ly, **kw):
