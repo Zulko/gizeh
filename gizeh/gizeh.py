@@ -22,7 +22,8 @@ except ImportError:
 class Surface:
     """
     A Surface is an object on which Elements are drawn, and which can be
-    exported as PNG images, numpy arrays, or be displayed into an IPython Notebook.
+    exported as PNG images, numpy arrays, or be displayed into an IPython
+    Notebook.
 
     Note that this class is simply a thin wrapper around Cairo's Surface class.
     """
@@ -60,8 +61,8 @@ class Surface:
     def write_to_png(self, filename, y_origin="top"):
         """Write the image to a PNG.
 
-        Parameter y_origin ("top" or "bottom") decides whether point (0,0) lies in
-        the top-left or bottom-left corner of the screen.
+        Parameter y_origin ("top" or "bottom") decides whether point (0,0)
+        lies in the top-left or bottom-left corner of the screen.
         """
 
         if y_origin == "bottom":
@@ -77,12 +78,12 @@ class Surface:
     def get_npimage(self, transparent=False, y_origin="top"):
         """ Returns a WxHx[3-4] numpy array representing the RGB picture.
 
-        If `transparent` is True the image is WxHx4 and represents a RGBA picture,
-        i.e. array[i,j] is the [r,g,b,a] value of the pixel at position [i,j].
-        If `transparent` is false, a RGB array is returned.
+        If `transparent` is True the image is WxHx4 and represents a RGBA
+        picture, i.e. array[i,j] is the [r,g,b,a] value of the pixel at
+        position [i,j]. If `transparent` is false, a RGB array is returned.
 
-        Parameter y_origin ("top" or "bottom") decides whether point (0,0) lies in
-        the top-left or bottom-left corner of the screen.
+        Parameter y_origin ("top" or "bottom") decides whether point (0,0)
+        lies in the top-left or bottom-left corner of the screen.
         """
 
         im = 0 + np.frombuffer(self._cairo_surface.get_data(), np.uint8)
@@ -101,8 +102,8 @@ class Surface:
     def ipython_display(self, y_origin="top"):
         """Display the surface in the IPython notebook.
 
-        Will only work if surface.ipython_display() is written at the end of one
-        of the notebook's cells.
+        Will only work if surface.ipython_display() is written at the end of
+        one of the notebook's cells.
         """
 
         from IPython.display import HTML
@@ -382,22 +383,22 @@ def shape_element(draw_contour, xy=(0, 0), angle=0, fill=None, stroke=(0, 0, 0),
     ------------
 
     xy
-      vector [x,y] indicating where the Element should be inserted in the drawing.
-      Note that for shapes like circle, square, rectangle, regular_polygon, the
-      [x,y] indicates the *center* of the element. So these elements are centered
-      around 0 by default.
+      vector [x,y] indicating where the Element should be inserted in the
+      drawing. Note that for shapes like circle, square, rectangle,
+      regular_polygon, the [x,y] indicates the *center* of the element.
+      So these elements are centered around 0 by default.
 
     angle
-      Angle by which to rotate the shape. The rotation uses (0,0) as center point.
-      Therefore all circles, rectangles, squares, and regular_polygons are rotated
-      around their center.
+      Angle by which to rotate the shape. The rotation uses (0,0) as center
+      point. Therefore all circles, rectangles, squares, and regular_polygons
+      are rotated around their center.
 
     fill
       Defines wath will fill the element. Default is None (no fill). `fill` can
       be one of the following:
       - A (r,g,b) color tuple, where 0 =< r,g,b =< 1
-      - A (r,g,b, a) color tuple, where 0=< r,g,b,a =< 1 (a defines the transparency:
-        0 is transparent, 1 is opaque)
+      - A (r,g,b, a) color tuple, where 0=< r,g,b,a =< 1 (a defines the
+        transparency: 0 is transparent, 1 is opaque)
       - A gizeh.ColorGradient object.
       - A gizeh.Surface
       - A numpy image (not implemented yet)
@@ -437,11 +438,11 @@ def shape_element(draw_contour, xy=(0, 0), angle=0, fill=None, stroke=(0, 0, 0),
             _set_source(ctx, stroke)
             ctx.stroke_preserve()
 
-    if angle == 0 and xy == (0,0):
+    if (angle == 0) and (tuple(xy) == (0, 0)):
         return Element(new_draw)
     elif angle == 0:
         return Element(new_draw).translate(xy)
-    elif xy == (0,0):
+    elif tuple(xy) == (0, 0):
         return Element(new_draw).rotate(angle)
     else:
         return Element(new_draw).rotate(angle).translate(xy)
