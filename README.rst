@@ -6,12 +6,13 @@ Gizeh - Cairo for tourists
 ===========================
 
 Gizeh is a Python library for vector graphics:
-::
+
+.. code:: python
 
     # Let's draw a red circle !
     import gizeh
     surface = gizeh.Surface(width=320, height=260) # in pixels
-    circle = gizeh.circle(r=30, xy= [40,40], fill=(1,0,0))
+    circle = gizeh.circle(r=30, xy=[40,40], fill=(1,0,0))
     circle.draw(surface) # draw the circle on the surface
     surface.write_to_png("circle.png") # export the surface as a PNG
 
@@ -58,7 +59,8 @@ Surfaces
 ~~~~~~~~
 
 A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw elements, and that you can save or export as an image:
-::
+
+.. code:: python
 
     import gizeh
 
@@ -87,7 +89,8 @@ Basic elements are circles, rectangles, lines, texts, etc., that you can draw on
 - ``stroke_width`` : the width (in pixels) of the element's contour. Default is 0 (no stroke).
 
 Examples of elements:
-::
+
+.. code:: python
 
     Pi = 3.14
     circ = gizeh.circle(r=30, xy=(50,50), fill=(1,1,1))
@@ -119,7 +122,8 @@ Transformations
 Any element can be transformed (translated, rotated or scaled). All transformations are *outplace*: they do not modify the original element, they create a modified version of it.
 
 Examples:
-::
+
+.. code:: python
 
     square_1 = gizeh.square(l=20, xy = [30,35], fill=(1,0,0))
     square_2 = square_1.rotate(Pi/8) # rotation around [0,0] by default
@@ -136,7 +140,8 @@ Groups
 A Group is a collection of elements which will be transformed and drawn together. The elements can be a basic element (square, circle...) or even groups.
 
 Examples:
-::
+
+.. code:: python
 
     square = gizeh.square(l=20, fill=(1,0,0), xy=(40,40))
     circle = gizeh.circle(r=20, fill=(1,2,0), xy=(50,30))
