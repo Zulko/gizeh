@@ -39,7 +39,7 @@ Gizeh depends on the Python packages ``cairocffi`` and ``Numpy``. They will both
     (sudo) pip install gizeh
 
 This method may fail if ``ez_setup`` is not installed on your computer. In this case install ``ez_setup`` first, with ::
-    
+
     (sudo) pip install ez_setup
 
 Contribute !
@@ -61,7 +61,7 @@ A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw
 ::
 
     import gizeh
-    
+
     # initialize surface
     surface = gizeh.Surface(width=320, height=260) # in pixels
 
@@ -72,7 +72,7 @@ A Surface is a rectangle of fixed dimensions (in pixels), on which you will draw
     # Now export the surface
     surface.get_npimage() # returns a (width x height x 3) numpy array
     surface.write_to_png("circle.png")
-    
+
 
 
 Elements
@@ -143,7 +143,7 @@ Examples:
     group_1 = gizeh.Group([square, circle])
     group_2 = group.translate(xy=[30,30]).rotate(Pi/4)
     group_3 = gizeh.Group([circle, group_1])
-    
+
     surface = gizeh.Surface(width=300,height=200)
     group.draw(surface)
     group_1.draw(surface)
@@ -156,7 +156,8 @@ That's all folks !
 ~~~~~~~~~~~~~~~~~~~
 
 That's about all there is to know.
-To go further, see the examples in the ``examples`` folder or (wishful thinking) on the Web.
+To go further, see the examples in the ``examples`` folder or the documentation
+directly in the code.
 
 
 Installation support
@@ -173,10 +174,10 @@ On Debian/Ubuntu ::
     sudo pip install gizeh
 
 On macOSX ::
-    
+
     pip install ez_setup
 
-   
+
     brew install pkg-config libffi
     export PKG_CONFIG_PATH=/usr/local/Cellar/libffi/3.0.13/lib/pkgconfig/
 
@@ -188,5 +189,4 @@ On macOSX ::
 
 .. _Zulko : https://github.com/Zulko
 .. _Github: https://github.com/Zulko/gizeh
-.. _Cairo:  http://cairographics.org/ 
-
+.. _Cairo:  http://cairographics.org/

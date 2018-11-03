@@ -3,6 +3,7 @@ python:
   - "3.6"
 # command to install dependencies
 before_install:
+  - apt-get install python-dev libffi-dev
   - pip install pytest coveralls pytest-cov pillow
   - pip install -e .
 # command to run tests
