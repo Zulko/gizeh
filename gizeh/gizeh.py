@@ -580,7 +580,7 @@ def text(txt, fontfamily, fontsize, fill=(0, 0, 0),
         ctx.set_font_size(fontsize)
         xbear, ybear, w, h, xadvance, yadvance = ctx.text_extents(txt)
         xshift = {"left": 0, "center": -w / 2, "right": -w}[h_align] - xbear
-        yshift = {"bottom": 0, "center": -h / 2, "top": -h}[v_align] - ybear
+        yshift = {"top": 0, "center": -h / 2, "bottom": -h}[v_align] - ybear
         new_xy = np.array(xy) + np.array([xshift, yshift])
         ctx.move_to(*new_xy)
         ctx.text_path(txt)
