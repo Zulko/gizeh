@@ -1,7 +1,7 @@
 from copy import copy, deepcopy
 from base64 import b64encode
 import numpy as np
-import cairocffi as cairo
+import cairo
 from .geometry import (rotation_matrix,
                        translation_matrix,
                        scaling_matrix,
