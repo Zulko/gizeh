@@ -7,7 +7,10 @@ http://en.wikipedia.org/wiki/Rose_mathematics
 
 import gizeh as gz
 import numpy as np
-from fractions import gcd
+try:
+    from fractions import gcd
+except ImportError:
+    from math import gcd
 
 def rose(d, n):
     """ Returns a polyline representing a rose of radius 1 """
