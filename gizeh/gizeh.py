@@ -50,7 +50,7 @@ class Surface:
             image = np.dstack([image, 255 * np.ones((h, w))])
         sf = Surface(w, h)
         arr = np.frombuffer(sf._cairo_surface.get_data(), np.uint8)
-        arr += image.flatten()
+        np.add(arr, image.flatten(), out=arr, casting="unsafe")
         sf._cairo_surface.mark_dirty()
         return sf
 
