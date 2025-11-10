@@ -1,0 +1,71 @@
+name: Version Bump & Release
+
+on:
+  push:
+    branches: [ main, master ]
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  bump-and-release:
+    if: ${{ !startsWith(github.event.head_commit.message, '[SKIP]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Configure Git author
+        run: |
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+      - name: Install bump and build tooling
+        run: |
+          python -m pip install --upgrade pip
+          pip install bump2version build
+
+      # Bump logic controlled by commit message prefix:
+      # [MAJOR] -> major, [FEATURE] -> minor, default -> patch
+      - name: Bump Major Version
+        if: startsWith(github.event.head_commit.message, '[MAJOR]')
+        run: |
+          bump2version major
+          echo "BUMPED=1" >> $GITHUB_ENV
+
+      - name: Bump Minor Version
+        if: startsWith(github.event.head_commit.message, '[FEATURE]')
+        run: |
+          bump2version minor
+          echo "BUMPED=1" >> $GITHUB_ENV
+
+      - name: Bump Patch Version
+        if: env.BUMPED != '1'
+        run: |
+          bump2version patch
+
+      - name: Push version tag
+        run: |
+          git push --follow-tags
+
+      - name: Build distributions
+        run: |
+          python -m build
+
+      # Prefer Trusted Publisher via OIDC if configured on PyPI.
+      # If not yet configured, set PYPI_API_TOKEN secret and uncomment 'password:' below.
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
+
+

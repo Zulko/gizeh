@@ -156,14 +156,12 @@ Setup and install deps:
 ```bash
 uv python install 3.12
 uv venv --python 3.12
-uv sync
+uv sync --group dev
 ```
 
 Run tests:
 
 ```bash
-uv add --dev pytest
-uv sync --dev
 uv run pytest -q
 ```
 

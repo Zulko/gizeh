@@ -32,6 +32,12 @@ dependencies = [
     "importlib-metadata>=1.0; python_version<'3.8'",
 ]
 
+[dependency-groups]
+dev = [
+    "pytest>=7.4.4",
+    "Pillow",
+]
+
 [project.urls]
 Homepage = "https://github.com/Zulko/gizeh"
 Repository = "https://github.com/Zulko/gizeh"
