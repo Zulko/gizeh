@@ -177,9 +177,14 @@ Quick import check:
 uv run python -c "import gizeh, numpy, cairocffi; print('ok')"
 ```
 
+Install and run pre-commit hooks:
+
+```bash
+uv run pre-commit install
+uv run pre-commit run --all-files
+```
+
 ## Contributing
 
 Gizeh is open-source (MIT) by [Zulko](https://github.com/Zulko). Contributions are welcome—issues and pull requests on
 [GitHub](https://github.com/Zulko/gizeh).
-
-

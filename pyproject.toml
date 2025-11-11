@@ -36,6 +36,7 @@ dependencies = [
 dev = [
     "pytest>=7.4.4",
     "Pillow",
+    "pre-commit",
 ]
 
 [project.urls]
@@ -47,7 +48,6 @@ Issues = "https://github.com/Zulko/gizeh/issues"
 exclude = ["docs*", "tests*"]
 
 [tool.ruff]
-line-length = 88
 target-version = "py37"
 
 [tool.ruff.lint]

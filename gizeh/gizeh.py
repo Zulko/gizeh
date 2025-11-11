@@ -1,13 +1,12 @@
-from copy import copy, deepcopy
 from base64 import b64encode
-import numpy as np
-import cairocffi as cairo
-from .geometry import (rotation_matrix,
-                       translation_matrix,
-                       scaling_matrix,
-                       polar2cart)
+from copy import copy, deepcopy
 from itertools import chain
 from math import sqrt
+
+import cairocffi as cairo
+import numpy as np
+
+from .geometry import polar2cart, rotation_matrix, scaling_matrix, translation_matrix
 
 try:
     from cStringIO import StringIO
@@ -29,11 +28,10 @@ class Surface:
     """
 
     def __init__(self, width, height, bg_color=None):
-        """"Initialize."""
+        """ "Initialize."""
         self.width = width
         self.height = height
-        self._cairo_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32,
-                                                 width, height)
+        self._cairo_surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, width, height)
         if bg_color:
             rectangle(2 * width, 2 * height, fill=bg_color).draw(self)
 
@@ -68,15 +66,18 @@ class Surface:
         if y_origin == "bottom":
             W, H = self.width, self.height
             new_surface = Surface(W, H)
-            rect = (rectangle(2 * W, 2 * H, fill=ImagePattern(self))
-                    .scale(1, -1).translate([0, H]))
+            rect = (
+                rectangle(2 * W, 2 * H, fill=ImagePattern(self))
+                .scale(1, -1)
+                .translate([0, H])
+            )
             rect.draw(new_surface)
             new_surface.write_to_png(filename, y_origin="top")
         else:
             self._cairo_surface.write_to_png(filename)
 
     def get_npimage(self, transparent=False, y_origin="top"):
-        """ Returns a WxHx[3-4] numpy array representing the RGB picture.
+        """Returns a WxHx[3-4] numpy array representing the RGB picture.
 
         If `transparent` is True the image is WxHx4 and represents a RGBA
         picture, i.e. array[i,j] is the [r,g,b,a] value of the pixel at
@@ -94,10 +95,10 @@ class Surface:
         return im if transparent else im[:, :, :3]
 
     def get_html_embed_code(self, y_origin="top"):
-        """Return an html code containing all the PNG data of the surface. """
+        """Return an html code containing all the PNG data of the surface."""
         png_data = self._repr_png_()
-        data = b64encode(png_data).decode('utf-8')
-        return """<img  src="data:image/png;base64,%s">""" % (data)
+        data = b64encode(png_data).decode("utf-8")
+        return f"""<img  src="data:image/png;base64,{data}">"""
 
     def ipython_display(self, y_origin="top"):
         """Display the surface in the IPython notebook.
@@ -107,6 +108,7 @@ class Surface:
         """
 
         from IPython.display import HTML
+
         return HTML(self.get_html_embed_code(y_origin=y_origin))
 
     def _repr_html_(self):
@@ -119,7 +121,7 @@ class Surface:
         return data.getvalue()
 
 
-class PDFSurface(object):
+class PDFSurface:
     """Simple class to allow Gizeh to create PDF figures."""
 
     def __init__(self, name, width, height, bg_color=None):
@@ -155,11 +157,9 @@ class Element:
         self.matrix = 1.0 * np.eye(3)
 
     def _cairo_matrix(self):
-        """Return the element's matrix in cairo form """
+        """Return the element's matrix in cairo form"""
         m = self.matrix
-        return cairo.Matrix(m[0, 0], m[1, 0],
-                            m[0, 1], m[1, 1],
-                            m[0, 2], m[1, 2])
+        return cairo.Matrix(m[0, 0], m[1, 0], m[0, 1], m[1, 1], m[0, 2], m[1, 2])
 
     def _transform_ctx(self, ctx):
         """Tranform the context before drawing.
@@ -169,28 +169,32 @@ class Element:
         ctx.set_matrix(self._cairo_matrix())
 
     def draw(self, surface):
-        """Draw the Element on a new context of the given Surface """
+        """Draw the Element on a new context of the given Surface"""
         ctx = surface.get_new_context()
         self._transform_ctx(ctx)
         self.draw_method(ctx)
 
     def set_matrix(self, new_mat):
-        """Return a copy of the element, with a new transformation matrix """
+        """Return a copy of the element, with a new transformation matrix"""
         new = deepcopy(self)
         new.matrix = new_mat
         return new
 
-    def rotate(self, angle, center=[0, 0]):
+    def rotate(self, angle, center=None):
         """Rotate the element.
 
         Returns a new element obtained by rotating the current element
         by the given `angle` (unit: rad) around the `center`.
         """
 
+        if center is None:
+            center = [0, 0]
         center = np.array(center)
-        mat = (translation_matrix(center)
-               .dot(rotation_matrix(angle))
-               .dot(translation_matrix(-center)))
+        mat = (
+            translation_matrix(center)
+            .dot(rotation_matrix(angle))
+            .dot(translation_matrix(-center))
+        )
 
         return self.set_matrix(mat.dot(self.matrix))
 
@@ -202,7 +206,7 @@ class Element:
         """
         return self.set_matrix(translation_matrix(xy).dot(self.matrix))
 
-    def scale(self, rx, ry=None, center=[0, 0]):
+    def scale(self, rx, ry=None, center=None):
         """Scale the element.
 
         Returns a new element obtained by scaling the current element
@@ -211,10 +215,14 @@ class Element:
         """
 
         ry = rx if (ry is None) else ry
+        if center is None:
+            center = [0, 0]
         center = np.array(center)
-        mat = (translation_matrix(center)
-               .dot(scaling_matrix(rx, ry))
-               .dot(translation_matrix(-center)))
+        mat = (
+            translation_matrix(center)
+            .dot(scaling_matrix(rx, ry))
+            .dot(translation_matrix(-center))
+        )
         return self.set_matrix(mat.dot(self.matrix))
 
 
@@ -232,17 +240,16 @@ class Group(Element):
         self.matrix = 1.0 * np.eye(3)
 
     def draw(self, surface):
-        """Draw the group to a new context of the given Surface """
+        """Draw the group to a new context of the given Surface"""
 
         for e in self.elements:
             m = self.matrix
-            mi = np.linalg.inv(m)
             new_matrix = m.dot(e.matrix)
             e.set_matrix(new_matrix).draw(surface)
 
 
 class ColorGradient:
-    """ This class is more like a structure to store the data for color gradients
+    """This class is more like a structure to store the data for color gradients
 
     These gradients are used as sources for filling elements or their borders (see
     parameters `fill` and `stroke` in `shape_elements`).
@@ -287,7 +294,7 @@ class ColorGradient:
 
 
 class ImagePattern(Element):
-    """ Class for images that will be used to fill an element or its contour.
+    """Class for images that will be used to fill an element or its contour.
 
     Parameters
     ------------
@@ -311,8 +318,10 @@ class ImagePattern(Element):
 
     """
 
-    def __init__(self, image, pixel_zero=[0, 0], filter="best", extend="none"):
+    def __init__(self, image, pixel_zero=None, filter="best", extend="none"):
         """Initialize"""
+        if pixel_zero is None:
+            pixel_zero = [0, 0]
         if isinstance(image, Surface):
             self._cairo_surface = image
         else:
@@ -322,24 +331,32 @@ class ImagePattern(Element):
         self.extend = extend
 
     def set_matrix(self, new_mat):
-        """ Returns a copy of the element, with a new transformation matrix """
+        """Returns a copy of the element, with a new transformation matrix"""
         new = copy(self)
         new.matrix = new_mat
         return new
 
     def make_cairo_pattern(self):
         pat = cairo.SurfacePattern(self._cairo_surface)
-        pat.set_filter({"best": cairo.FILTER_BEST,
-                        "nearest": cairo.FILTER_NEAREST,
-                        "gaussian": cairo.FILTER_GAUSSIAN,
-                        "good": cairo.FILTER_GOOD,
-                        "bilinear": cairo.FILTER_BILINEAR,
-                        "fast": cairo.FILTER_FAST}[self.filter])
+        pat.set_filter(
+            {
+                "best": cairo.FILTER_BEST,
+                "nearest": cairo.FILTER_NEAREST,
+                "gaussian": cairo.FILTER_GAUSSIAN,
+                "good": cairo.FILTER_GOOD,
+                "bilinear": cairo.FILTER_BILINEAR,
+                "fast": cairo.FILTER_FAST,
+            }[self.filter]
+        )
 
-        pat.set_extend({"none": cairo.EXTEND_NONE,
-                        "repeat": cairo.EXTEND_REPEAT,
-                        "reflect": cairo.EXTEND_REFLECT,
-                        "pad": cairo.EXTEND_PAD}[self.extend])
+        pat.set_extend(
+            {
+                "none": cairo.EXTEND_NONE,
+                "repeat": cairo.EXTEND_REPEAT,
+                "reflect": cairo.EXTEND_REFLECT,
+                "pad": cairo.EXTEND_PAD,
+            }[self.extend]
+        )
 
         pat.set_matrix(self._cairo_matrix())
 
@@ -347,11 +364,11 @@ class ImagePattern(Element):
 
 
 for meth in ["scale", "rotate", "translate", "_cairo_matrix"]:
-    exec("ImagePattern.%s = Element.%s" % (meth, meth))
+    exec(f"ImagePattern.{meth} = Element.{meth}")
 
 
 def _set_source(ctx, src):
-    """ Sets a source before drawing an element.
+    """Sets a source before drawing an element.
 
     The source is what fills an element (or the element's contour).
     If can be of many forms. See the documentation of shape_element for more
@@ -365,7 +382,7 @@ def _set_source(ctx, src):
     elif isinstance(src, np.ndarray) and len(src.shape) > 1:
         string = src.to_string()
         surface = cairo.ImageSurface.create_for_data(string)
-        set_source(ctx, surface)
+        ctx.set_source_surface(surface, 0, 0)
     elif len(src) == 4:  # RGBA
         ctx.set_source_rgba(*src)
     else:  # RGB
@@ -375,8 +392,17 @@ def _set_source(ctx, src):
 #########################################################################
 # BASE ELEMENTS
 
-def shape_element(draw_contour, xy=(0, 0), angle=0, fill=None, stroke=(0, 0, 0),
-                  stroke_width=0, line_cap=None, line_join=None):
+
+def shape_element(
+    draw_contour,
+    xy=(0, 0),
+    angle=0,
+    fill=None,
+    stroke=(0, 0, 0),
+    stroke_width=0,
+    line_cap=None,
+    line_join=None,
+):
     """
 
     Parameters
@@ -428,13 +454,21 @@ def shape_element(draw_contour, xy=(0, 0), angle=0, fill=None, stroke=(0, 0, 0),
             ctx.move_to(*xy)
             ctx.set_line_width(stroke_width)
             if line_cap is not None:
-                ctx.set_line_cap({"butt":  cairo.LINE_CAP_BUTT,
-                                  "round": cairo.LINE_CAP_ROUND,
-                                  "square": cairo.LINE_CAP_SQUARE}[line_cap])
+                ctx.set_line_cap(
+                    {
+                        "butt": cairo.LINE_CAP_BUTT,
+                        "round": cairo.LINE_CAP_ROUND,
+                        "square": cairo.LINE_CAP_SQUARE,
+                    }[line_cap]
+                )
             if line_join is not None:
-                ctx.set_line_join({"cut":  cairo.LINE_JOIN_BEVEL,
-                                   "square": cairo.LINE_JOIN_MITER,
-                                   "round": cairo.LINE_JOIN_ROUND}[line_join])
+                ctx.set_line_join(
+                    {
+                        "cut": cairo.LINE_JOIN_BEVEL,
+                        "square": cairo.LINE_JOIN_MITER,
+                        "round": cairo.LINE_JOIN_ROUND,
+                    }[line_join]
+                )
             _set_source(ctx, stroke)
             ctx.stroke_preserve()
 
@@ -452,7 +486,7 @@ def rectangle(lx, ly, **kw):
     return shape_element(lambda c: c.rectangle(-lx / 2, -ly / 2, lx, ly), **kw)
 
 
-def square(l, **kw):
+def square(l, **kw):  # noqa: E741
     return rectangle(l, l, **kw)
 
 
@@ -471,6 +505,7 @@ def polyline(points, close_path=False, **kw):
             ctx.line_to(*p)
         if close_path:
             ctx.close_path()
+
     return shape_element(draw, **kw)
 
 
@@ -480,36 +515,41 @@ def regular_polygon(r, n, **kw):
 
 
 def bezier_curve(points, **kw):
-    '''Create cubic Bezier curve
+    """Create cubic Bezier curve
 
     points
       List of four (x,y) tuples specifying the points of the curve.
-    '''
+    """
+
     def draw(ctx):
         ctx.move_to(*points[0])
         ctx.curve_to(*tuple(chain(*points))[2:])
+
     return shape_element(draw, **kw)
 
 
 def ellipse(w, h, **kw):
-    '''Create an ellipse.
+    """Create an ellipse.
 
     w, h
       These are used to set the control points for the first quarter
       of the ellipse.
-    '''
+    """
 
     # Bezier control points for a quarter of an ellipse.
-    ctrl_pnts = [((w / 2), 0), ((w / 2), (h / 2) * (4 / 3) * (sqrt(2) - 1)),
-                 ((w / 2) * (4 / 3) * (sqrt(2) - 1), (h / 2)), (0, (h / 2))]
+    ctrl_pnts = [
+        ((w / 2), 0),
+        ((w / 2), (h / 2) * (4 / 3) * (sqrt(2) - 1)),
+        ((w / 2) * (4 / 3) * (sqrt(2) - 1), (h / 2)),
+        (0, (h / 2)),
+    ]
 
     # Create a list, all_points, which will be populated with lists of control
     # points for 4 Bezier curves that will approximate the ellipse.
     all_points = []
     for i in [1, -1]:
         for j in [1, -1]:
-            all_points.append([(pnt[0] * i, pnt[1] * (-j))
-                               for pnt in ctrl_pnts])
+            all_points.append([(pnt[0] * i, pnt[1] * (-j)) for pnt in ctrl_pnts])
     # Permutes the last three lists to put the curves in correct order
     all_points.append(all_points.pop(1))
     # Correct the order of the two sublists defining their respective quarter
@@ -527,9 +567,9 @@ def ellipse(w, h, **kw):
 
 
 def star(nbranches=5, radius=1.0, ratio=0.5, **kwargs):
-    """ This function draws a star with the given number of branches,
+    """This function draws a star with the given number of branches,
     radius, and ratio between branches and body. It accepts the usual
-    parameters xy, angle, fill, etc. """
+    parameters xy, angle, fill, etc."""
 
     rr = radius * np.array(nbranches * [1.0, ratio])
     aa = np.linspace(0, 2 * np.pi, 2 * nbranches + 1)[:-1]
@@ -537,11 +577,21 @@ def star(nbranches=5, radius=1.0, ratio=0.5, **kwargs):
     return polyline(points, close_path=True, **kwargs)
 
 
-def text(txt, fontfamily, fontsize, fill=(0, 0, 0),
-         h_align="center", v_align="center",
-         stroke=(0, 0, 0), stroke_width=0,
-         fontweight="normal", fontslant="normal",
-         angle=0, xy=[0, 0], y_origin="top"):
+def text(
+    txt,
+    fontfamily,
+    fontsize,
+    fill=(0, 0, 0),
+    h_align="center",
+    v_align="center",
+    stroke=(0, 0, 0),
+    stroke_width=0,
+    fontweight="normal",
+    fontslant="normal",
+    angle=0,
+    xy=None,
+    y_origin="top",
+):
     """Create a text object.
 
     Parameters
@@ -568,14 +618,19 @@ def text(txt, fontfamily, fontsize, fill=(0, 0, 0),
       see the doc for ``shape_element``
     """
 
-    fontweight = {"normal": cairo.FONT_WEIGHT_NORMAL,
-                  "bold":   cairo.FONT_WEIGHT_BOLD}[fontweight]
-    fontslant = {"normal":  cairo.FONT_SLANT_NORMAL,
-                 "oblique": cairo.FONT_SLANT_OBLIQUE,
-                 "italic":  cairo.FONT_SLANT_ITALIC}[fontslant]
+    fontweight = {"normal": cairo.FONT_WEIGHT_NORMAL, "bold": cairo.FONT_WEIGHT_BOLD}[
+        fontweight
+    ]
+    fontslant = {
+        "normal": cairo.FONT_SLANT_NORMAL,
+        "oblique": cairo.FONT_SLANT_OBLIQUE,
+        "italic": cairo.FONT_SLANT_ITALIC,
+    }[fontslant]
 
     def draw(ctx):
-
+        nonlocal xy
+        if xy is None:
+            xy = [0, 0]
         ctx.select_font_face(fontfamily, fontslant, fontweight)
         ctx.set_font_size(fontsize)
         xbear, ybear, w, h, xadvance, yadvance = ctx.text_extents(txt)
@@ -593,5 +648,4 @@ def text(txt, fontfamily, fontsize, fill=(0, 0, 0),
             ctx.set_line_width(stroke_width)
             ctx.stroke()
 
-    return (Element(draw).scale(1, 1 if (y_origin == "top") else -1)
-            .rotate(angle))
+    return Element(draw).scale(1, 1 if (y_origin == "top") else -1).rotate(angle)
