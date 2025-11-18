@@ -2,8 +2,9 @@
 Tests for Gizeh
 """
 
-import gizeh as gz
 import os
+
+import gizeh as gz
 
 
 def test_pdfsurface(tmpdir):
@@ -18,11 +19,13 @@ def test_pdfsurface(tmpdir):
     shape = shape.translate([im_size // 2, im_size // 2])
 
     # Some text to throw on the shape...
-    txt = gz.text("Gizeh on pdf",
-                  fontfamily="Arial",
-                  fontsize=50,
-                  fill=(0, 0, 0),
-                  xy=(im_size // 2, im_size // 2))
+    txt = gz.text(
+        "Gizeh on pdf",
+        fontfamily="Arial",
+        fontsize=50,
+        fill=(0, 0, 0),
+        xy=(im_size // 2, im_size // 2),
+    )
 
     # Create pdf surface
     filepath = os.path.join(str(tmpdir), "pdfsurface_test.pdf")
